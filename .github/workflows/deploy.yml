@@ -8,9 +8,6 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: tea-tracker
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,6 +27,6 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: tea-tracker/dist
+          publish_dir: dist
           publish_branch: gh-pages
           cname: '' 
