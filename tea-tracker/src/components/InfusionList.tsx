@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { List, ListItem, ListItemText, IconButton, TextField, Button, Box, Typography, ListItemButton } from '@mui/material';
+import { List, ListItem, ListItemText, IconButton, TextField, Button, Box, Typography, ListItemButton, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { getInfusionsByBrewing, addInfusion, deleteInfusion } from '../db';
 import type { Infusion, Brewing } from '../types';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,6 +12,11 @@ const InfusionList: React.FC<{ brewing: Brewing | null }> = ({ brewing }) => {
   const [temperature, setTemperature] = useState('');
   const [steepTime, setSteepTime] = useState('');
   const [tasteNotes, setTasteNotes] = useState('');
+  const [editInfusion, setEditInfusion] = useState<Infusion | null>(null);
+  const [editWaterAmount, setEditWaterAmount] = useState('');
+  const [editTemperature, setEditTemperature] = useState('');
+  const [editSteepTime, setEditSteepTime] = useState('');
+  const [editTasteNotes, setEditTasteNotes] = useState('');
 
   const refresh = async () => {
     if (brewing) setInfusions(await getInfusionsByBrewing(brewing.id));
@@ -41,6 +47,36 @@ const InfusionList: React.FC<{ brewing: Brewing | null }> = ({ brewing }) => {
     refresh();
   };
 
+  const handleEdit = (infusion: Infusion) => {
+    setEditInfusion(infusion);
+    setEditWaterAmount(infusion.waterAmount.toString());
+    setEditTemperature(infusion.temperature.toString());
+    setEditSteepTime(infusion.steepTime.toString());
+    setEditTasteNotes(infusion.tasteNotes || '');
+  };
+
+  const handleEditSave = async () => {
+    if (
+      editInfusion &&
+      editWaterAmount.trim() &&
+      editTemperature.trim() &&
+      editSteepTime.trim() &&
+      !isNaN(Number(editWaterAmount)) &&
+      !isNaN(Number(editTemperature)) &&
+      !isNaN(Number(editSteepTime))
+    ) {
+      await addInfusion({
+        ...editInfusion,
+        waterAmount: Number(editWaterAmount),
+        temperature: Number(editTemperature),
+        steepTime: Number(editSteepTime),
+        tasteNotes: editTasteNotes,
+      });
+      setEditInfusion(null);
+      refresh();
+    }
+  };
+
   if (!brewing) return null;
 
   return (
@@ -58,9 +94,14 @@ const InfusionList: React.FC<{ brewing: Brewing | null }> = ({ brewing }) => {
           <ListItem
             key={infusion.id}
             secondaryAction={
-              <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(infusion.id)}>
-                <DeleteIcon />
-              </IconButton>
+              <>
+                <IconButton edge="end" aria-label="edit" onClick={() => handleEdit(infusion)}>
+                  <EditIcon />
+                </IconButton>
+                <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(infusion.id)}>
+                  <DeleteIcon />
+                </IconButton>
+              </>
             }
             disablePadding
           >
@@ -73,6 +114,19 @@ const InfusionList: React.FC<{ brewing: Brewing | null }> = ({ brewing }) => {
           </ListItem>
         ))}
       </List>
+      <Dialog open={!!editInfusion} onClose={() => setEditInfusion(null)}>
+        <DialogTitle>Edit Infusion</DialogTitle>
+        <DialogContent>
+          <TextField label="Water (ml)" value={editWaterAmount} onChange={e => setEditWaterAmount(e.target.value)} fullWidth margin="dense" type="number" />
+          <TextField label="Temp (°C)" value={editTemperature} onChange={e => setEditTemperature(e.target.value)} fullWidth margin="dense" type="number" />
+          <TextField label="Steep Time (s)" value={editSteepTime} onChange={e => setEditSteepTime(e.target.value)} fullWidth margin="dense" type="number" />
+          <TextField label="Taste Notes" value={editTasteNotes} onChange={e => setEditTasteNotes(e.target.value)} fullWidth margin="dense" />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditInfusion(null)}>Cancel</Button>
+          <Button onClick={handleEditSave} variant="contained">Save</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

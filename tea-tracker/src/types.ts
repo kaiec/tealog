@@ -5,11 +5,14 @@ export interface Tea {
   notes?: string;
 }
 
+export type TeaAmountUnit = 'g' | 'tsp' | 'bag';
+
 export interface Brewing {
   id: string;
   teaId: string;
   date: string; // ISO string
-  amount: number; // grams
+  amount: number;
+  unit: TeaAmountUnit;
 }
 
 export interface Infusion {

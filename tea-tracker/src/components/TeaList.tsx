@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { List, ListItem, ListItemText, IconButton, TextField, Button, Box, Typography, ListItemButton } from '@mui/material';
+import { List, ListItem, ListItemText, IconButton, TextField, Button, Box, Typography, ListItemButton, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { getTeas, addTea, deleteTea } from '../db';
 import type { Tea } from '../types';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,6 +11,10 @@ const TeaList: React.FC<{ onSelect: (tea: Tea) => void; selectedTeaId?: string }
   const [name, setName] = useState('');
   const [type, setType] = useState('');
   const [notes, setNotes] = useState('');
+  const [editTea, setEditTea] = useState<Tea | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editType, setEditType] = useState('');
+  const [editNotes, setEditNotes] = useState('');
 
   const refresh = async () => {
     setTeas(await getTeas());
@@ -31,6 +36,21 @@ const TeaList: React.FC<{ onSelect: (tea: Tea) => void; selectedTeaId?: string }
     refresh();
   };
 
+  const handleEdit = (tea: Tea) => {
+    setEditTea(tea);
+    setEditName(tea.name);
+    setEditType(tea.type || '');
+    setEditNotes(tea.notes || '');
+  };
+
+  const handleEditSave = async () => {
+    if (editTea) {
+      await addTea({ ...editTea, name: editName, type: editType, notes: editNotes });
+      setEditTea(null);
+      refresh();
+    }
+  };
+
   return (
     <Box>
       <Typography variant="h6" gutterBottom>Teas</Typography>
@@ -45,9 +65,14 @@ const TeaList: React.FC<{ onSelect: (tea: Tea) => void; selectedTeaId?: string }
           <ListItem
             key={tea.id}
             secondaryAction={
-              <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(tea.id)}>
-                <DeleteIcon />
-              </IconButton>
+              <>
+                <IconButton edge="end" aria-label="edit" onClick={() => handleEdit(tea)}>
+                  <EditIcon />
+                </IconButton>
+                <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(tea.id)}>
+                  <DeleteIcon />
+                </IconButton>
+              </>
             }
             disablePadding
           >
@@ -60,6 +85,18 @@ const TeaList: React.FC<{ onSelect: (tea: Tea) => void; selectedTeaId?: string }
           </ListItem>
         ))}
       </List>
+      <Dialog open={!!editTea} onClose={() => setEditTea(null)}>
+        <DialogTitle>Edit Tea</DialogTitle>
+        <DialogContent>
+          <TextField label="Name" value={editName} onChange={e => setEditName(e.target.value)} fullWidth margin="dense" />
+          <TextField label="Type" value={editType} onChange={e => setEditType(e.target.value)} fullWidth margin="dense" />
+          <TextField label="Notes" value={editNotes} onChange={e => setEditNotes(e.target.value)} fullWidth margin="dense" />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditTea(null)}>Cancel</Button>
+          <Button onClick={handleEditSave} variant="contained">Save</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

@@ -1,13 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { List, ListItem, ListItemText, IconButton, TextField, Button, Box, Typography, ListItemButton } from '@mui/material';
+import { List, ListItem, ListItemText, IconButton, TextField, Button, Box, Typography, ListItemButton, Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { getBrewingsByTea, addBrewing, deleteBrewing } from '../db';
-import type { Brewing, Tea } from '../types';
+import type { Brewing, Tea, TeaAmountUnit } from '../types';
 import { v4 as uuidv4 } from 'uuid';
+
+const unitOptions: TeaAmountUnit[] = ['g', 'tsp', 'bag'];
 
 const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => void; selectedBrewingId?: string }> = ({ tea, onSelect, selectedBrewingId }) => {
   const [brewings, setBrewings] = useState<Brewing[]>([]);
   const [amount, setAmount] = useState('');
+  const [unit, setUnit] = useState<TeaAmountUnit>('g');
+  const [editBrewing, setEditBrewing] = useState<Brewing | null>(null);
+  const [editAmount, setEditAmount] = useState('');
+  const [editUnit, setEditUnit] = useState<TeaAmountUnit>('g');
 
   const refresh = async () => {
     if (tea) setBrewings(await getBrewingsByTea(tea.id));
@@ -21,8 +28,9 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
 
   const handleAdd = async () => {
     if (!tea || !amount.trim() || isNaN(Number(amount))) return;
-    await addBrewing({ id: uuidv4(), teaId: tea.id, date: new Date().toISOString(), amount: Number(amount) });
+    await addBrewing({ id: uuidv4(), teaId: tea.id, date: new Date().toISOString(), amount: Number(amount), unit });
     setAmount('');
+    setUnit('g');
     refresh();
   };
 
@@ -31,13 +39,33 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
     refresh();
   };
 
+  const handleEdit = (brewing: Brewing) => {
+    setEditBrewing(brewing);
+    setEditAmount(brewing.amount.toString());
+    setEditUnit(brewing.unit);
+  };
+
+  const handleEditSave = async () => {
+    if (editBrewing && editAmount.trim() && !isNaN(Number(editAmount))) {
+      await addBrewing({ ...editBrewing, amount: Number(editAmount), unit: editUnit });
+      setEditBrewing(null);
+      refresh();
+    }
+  };
+
   if (!tea) return null;
 
   return (
     <Box mt={4}>
       <Typography variant="h6" gutterBottom>Brewings for {tea.name}</Typography>
       <Box display="flex" gap={1} mb={2}>
-        <TextField label="Amount (g)" value={amount} onChange={e => setAmount(e.target.value)} size="small" type="number" />
+        <TextField label="Amount" value={amount} onChange={e => setAmount(e.target.value)} size="small" type="number" />
+        <FormControl size="small" sx={{ minWidth: 80 }}>
+          <InputLabel>Unit</InputLabel>
+          <Select value={unit} label="Unit" onChange={e => setUnit(e.target.value as TeaAmountUnit)}>
+            {unitOptions.map(u => <MenuItem key={u} value={u}>{u}</MenuItem>)}
+          </Select>
+        </FormControl>
         <Button variant="contained" onClick={handleAdd}>Add</Button>
       </Box>
       <List>
@@ -45,9 +73,14 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
           <ListItem
             key={brewing.id}
             secondaryAction={
-              <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(brewing.id)}>
-                <DeleteIcon />
-              </IconButton>
+              <>
+                <IconButton edge="end" aria-label="edit" onClick={() => handleEdit(brewing)}>
+                  <EditIcon />
+                </IconButton>
+                <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(brewing.id)}>
+                  <DeleteIcon />
+                </IconButton>
+              </>
             }
             disablePadding
           >
@@ -55,11 +88,27 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
               selected={brewing.id === selectedBrewingId}
               onClick={() => onSelect(brewing)}
             >
-              <ListItemText primary={`Brewed on ${new Date(brewing.date).toLocaleString()}`} secondary={`Amount: ${brewing.amount}g`} />
+              <ListItemText primary={`Brewed on ${new Date(brewing.date).toLocaleString()}`} secondary={`Amount: ${brewing.amount} ${brewing.unit}`} />
             </ListItemButton>
           </ListItem>
         ))}
       </List>
+      <Dialog open={!!editBrewing} onClose={() => setEditBrewing(null)}>
+        <DialogTitle>Edit Brewing</DialogTitle>
+        <DialogContent>
+          <TextField label="Amount" value={editAmount} onChange={e => setEditAmount(e.target.value)} fullWidth margin="dense" type="number" />
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Unit</InputLabel>
+            <Select value={editUnit} label="Unit" onChange={e => setEditUnit(e.target.value as TeaAmountUnit)}>
+              {unitOptions.map(u => <MenuItem key={u} value={u}>{u}</MenuItem>)}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditBrewing(null)}>Cancel</Button>
+          <Button onClick={handleEditSave} variant="contained">Save</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
