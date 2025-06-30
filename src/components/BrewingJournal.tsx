@@ -25,7 +25,7 @@ const BrewingJournal: React.FC<BrewingJournalProps> = ({ onSelectBrewing }) => {
           all.push({ tea, brewing, infusions });
         }
       }
-      all.sort((a, b) => b.brewing.date.localeCompare(a.brewing.date));
+      all.sort((a: { tea: Tea; brewing: Brewing; infusions: Infusion[] }, b: { tea: Tea; brewing: Brewing; infusions: Infusion[] }) => b.brewing.date.localeCompare(a.brewing.date));
       setEntries(all);
     };
     fetchAll();

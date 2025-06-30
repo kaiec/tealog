@@ -55,9 +55,9 @@ const TeaList: React.FC<{ onSelect: (tea: Tea) => void; selectedTeaId?: string }
     <Box>
       <Typography variant="h6" gutterBottom>Teas</Typography>
       <Box display="flex" gap={1} mb={2}>
-        <TextField label="Name" value={name} onChange={e => setName(e.target.value)} size="small" />
-        <TextField label="Type" value={type} onChange={e => setType(e.target.value)} size="small" />
-        <TextField label="Notes" value={notes} onChange={e => setNotes(e.target.value)} size="small" />
+        <TextField label="Name" value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} size="small" />
+        <TextField label="Type" value={type} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setType(e.target.value)} size="small" />
+        <TextField label="Notes" value={notes} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNotes(e.target.value)} size="small" />
         <Button variant="contained" onClick={handleAdd}>Add</Button>
       </Box>
       <List>
@@ -88,9 +88,9 @@ const TeaList: React.FC<{ onSelect: (tea: Tea) => void; selectedTeaId?: string }
       <Dialog open={!!editTea} onClose={() => setEditTea(null)}>
         <DialogTitle>Edit Tea</DialogTitle>
         <DialogContent>
-          <TextField label="Name" value={editName} onChange={e => setEditName(e.target.value)} fullWidth margin="dense" />
-          <TextField label="Type" value={editType} onChange={e => setEditType(e.target.value)} fullWidth margin="dense" />
-          <TextField label="Notes" value={editNotes} onChange={e => setEditNotes(e.target.value)} fullWidth margin="dense" />
+          <TextField label="Name" value={editName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditName(e.target.value)} fullWidth margin="dense" />
+          <TextField label="Type" value={editType} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditType(e.target.value)} fullWidth margin="dense" />
+          <TextField label="Notes" value={editNotes} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditNotes(e.target.value)} fullWidth margin="dense" />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setEditTea(null)}>Cancel</Button>

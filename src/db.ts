@@ -1,4 +1,4 @@
-import { openDB, type DBSchema } from 'idb';
+import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import type { Tea, Brewing, Infusion } from './types';
 
 interface TeaTrackerDB extends DBSchema {
@@ -19,7 +19,7 @@ interface TeaTrackerDB extends DBSchema {
 }
 
 export const dbPromise = openDB<TeaTrackerDB>('tea-tracker-db', 1, {
-  upgrade(db) {
+  upgrade(db: IDBPDatabase<TeaTrackerDB>) {
     db.createObjectStore('teas', { keyPath: 'id' });
     const brewingStore = db.createObjectStore('brewings', { keyPath: 'id' });
     brewingStore.createIndex('teaId', 'teaId');

@@ -19,7 +19,7 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
   const refresh = async (selectId?: string) => {
     if (tea) {
       let brewings = await getBrewingsByTea(tea.id);
-      brewings = brewings.sort((a, b) => b.date.localeCompare(a.date)); // newest first
+      brewings = brewings.sort((a: Brewing, b: Brewing) => b.date.localeCompare(a.date)); // newest first
       setBrewings(brewings);
       // Prefill with last brewing values
       if (brewings.length > 0) {
@@ -31,7 +31,7 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
       }
       // If a new brewing was just added, select it
       if (selectId) {
-        const newBrewing = brewings.find(b => b.id === selectId);
+        const newBrewing = brewings.find((b: Brewing) => b.id === selectId);
         if (newBrewing) onSelect(newBrewing);
       }
     } else {
@@ -78,17 +78,17 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
     <Box mt={4}>
       <Typography variant="h6" gutterBottom>Brewings for {tea.name}</Typography>
       <Box display="flex" gap={1} mb={2}>
-        <TextField label="Amount" value={amount} onChange={e => setAmount(e.target.value)} size="small" type="number" />
+        <TextField label="Amount" value={amount} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAmount(e.target.value)} size="small" type="number" />
         <FormControl size="small" sx={{ minWidth: 80 }}>
           <InputLabel>Unit</InputLabel>
-          <Select value={unit} label="Unit" onChange={e => setUnit(e.target.value as TeaAmountUnit)}>
+          <Select value={unit} label="Unit" onChange={(e: any) => setUnit(e.target.value as TeaAmountUnit)}>
             {unitOptions.map(u => <MenuItem key={u} value={u}>{u}</MenuItem>)}
           </Select>
         </FormControl>
         <Button variant="contained" onClick={handleAdd}>Add</Button>
       </Box>
       <List>
-        {brewings.map(brewing => (
+        {brewings.map((brewing: Brewing) => (
           <ListItem
             key={brewing.id}
             secondaryAction={

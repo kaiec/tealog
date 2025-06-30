@@ -146,14 +146,14 @@ const InfusionList: React.FC<{ brewing: Brewing | null }> = ({ brewing }) => {
     <Box mt={4}>
       <Typography variant="h6" gutterBottom>Infusions</Typography>
       <Box display="flex" gap={1} mb={2} flexWrap="wrap">
-        <TextField label="Water (ml)" value={waterAmount} onChange={e => setWaterAmount(e.target.value)} size="small" type="number" />
-        <TextField label="Temp (°C)" value={temperature} onChange={e => setTemperature(e.target.value)} size="small" type="number" />
-        <TextField label="Steep Time (s)" value={steepTime} onChange={e => setSteepTime(e.target.value)} size="small" type="number" />
-        <TextField label="Taste Notes" value={tasteNotes} onChange={e => setTasteNotes(e.target.value)} size="small" />
+        <TextField label="Water (ml)" value={waterAmount} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWaterAmount(e.target.value)} size="small" type="number" />
+        <TextField label="Temp (°C)" value={temperature} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTemperature(e.target.value)} size="small" type="number" />
+        <TextField label="Steep Time (s)" value={steepTime} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSteepTime(e.target.value)} size="small" type="number" />
+        <TextField label="Taste Notes" value={tasteNotes} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTasteNotes(e.target.value)} size="small" />
         <Button variant="contained" onClick={handleAdd}>Add</Button>
       </Box>
       <List>
-        {infusions.map(infusion => (
+        {infusions.map((infusion: Infusion) => (
           <ListItem
             key={infusion.id}
             secondaryAction={
