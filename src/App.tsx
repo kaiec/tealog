@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { AppBar, Toolbar, Typography, Container, Box, Paper, Button, Stack, IconButton, MenuItem, Select, InputLabel, FormControl, Snackbar, Alert } from '@mui/material'
 import HomeIcon from '@mui/icons-material/Home'
+import LocalCafeIcon from '@mui/icons-material/LocalCafe'
 import TeaList from './components/TeaList'
 import BrewingList from './components/BrewingList'
 import InfusionList from './components/InfusionList'
@@ -88,10 +89,11 @@ function App() {
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-      <AppBar position="static">
+      <AppBar position="static" color="primary" elevation={3} sx={{ boxShadow: '0 2px 8px 0 rgba(56,142,60,0.10)' }}>
         <Toolbar>
           {HomeButton}
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          <LocalCafeIcon sx={{ mr: 1, fontSize: 32, color: 'success.main' }} />
+          <Typography variant="h5" component="div" sx={{ flexGrow: 1, fontWeight: 700, letterSpacing: 1 }}>
             Tea Tracker
           </Typography>
         </Toolbar>

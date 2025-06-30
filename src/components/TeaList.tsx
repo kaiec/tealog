@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { List, ListItem, ListItemText, IconButton, TextField, Button, Box, Typography, ListItemButton, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { List, ListItem, ListItemText, IconButton, TextField, Button, Box, Typography, ListItemButton, Dialog, DialogTitle, DialogContent, DialogActions, Card, CardContent, CardActions } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { getTeas, addTea, deleteTea } from '../db';
 import type { Tea } from '../types';
 import { v4 as uuidv4 } from 'uuid';
+import SpaIcon from '@mui/icons-material/Spa';
 
 const TeaList: React.FC<{ onSelect: (tea: Tea) => void; selectedTeaId?: string; onTeaAdded?: () => void; showSnackbar?: (msg: string, action?: React.ReactNode) => void }> = ({ onSelect, selectedTeaId, onTeaAdded, showSnackbar }) => {
   const [teas, setTeas] = useState<Tea[]>([]);
@@ -91,28 +92,34 @@ const TeaList: React.FC<{ onSelect: (tea: Tea) => void; selectedTeaId?: string; 
         {teas.filter(tea =>
           tea.name.toLowerCase().includes(search.toLowerCase()) ||
           (tea.type && tea.type.toLowerCase().includes(search.toLowerCase()))
+        ).length === 0 && (
+          <Box textAlign="center" py={4}>
+            <SpaIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
+            <Typography variant="body1" color="text.secondary">No teas found. Add your first tea!</Typography>
+          </Box>
+        )}
+        {teas.filter(tea =>
+          tea.name.toLowerCase().includes(search.toLowerCase()) ||
+          (tea.type && tea.type.toLowerCase().includes(search.toLowerCase()))
         ).map(tea => (
-          <ListItem
-            key={tea.id}
-            secondaryAction={
-              <>
-                <IconButton edge="end" aria-label="edit" onClick={() => handleEdit(tea)}>
-                  <EditIcon />
-                </IconButton>
-                <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(tea.id)}>
-                  <DeleteIcon />
-                </IconButton>
-              </>
-            }
-            disablePadding
-          >
-            <ListItemButton
-              selected={tea.id === selectedTeaId}
-              onClick={() => onSelect(tea)}
-            >
-              <ListItemText primary={tea.name} secondary={tea.type} />
-            </ListItemButton>
-          </ListItem>
+          <Card key={tea.id} sx={{ mb: 2, boxShadow: '0 2px 8px 0 rgba(56,142,60,0.08)', borderLeft: tea.id === selectedTeaId ? '6px solid #388e3c' : undefined }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', p: 2 }} onClick={() => onSelect(tea)}>
+              <SpaIcon sx={{ color: 'primary.main', mr: 2, fontSize: 32 }} />
+              <Box flex={1}>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>{tea.name}</Typography>
+                <Typography variant="body2" color="text.secondary">{tea.type}</Typography>
+                {tea.notes && <Typography variant="body2" color="text.secondary">{tea.notes}</Typography>}
+              </Box>
+            </CardContent>
+            <CardActions sx={{ justifyContent: 'flex-end', pr: 2 }}>
+              <IconButton edge="end" aria-label="edit" onClick={() => handleEdit(tea)} color="primary">
+                <EditIcon />
+              </IconButton>
+              <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(tea.id)} color="secondary">
+                <DeleteIcon />
+              </IconButton>
+            </CardActions>
+          </Card>
         ))}
       </List>
       <Dialog open={!!editTea} onClose={() => setEditTea(null)}>
