@@ -6,23 +6,25 @@ import { ThemeProvider, createTheme, CssBaseline } from '@mui/material'
 
 const theme = createTheme({
   palette: {
-    primary: { main: '#388e3c' },
-    secondary: { main: '#8d6748' },
-    background: { default: '#f7f5ed', paper: '#fffbe6' },
-    success: { main: '#ffd700' },
-  },
+    primary: { main: '#729b79' },
+    secondary: { main: '#b09a82' },
+    background: { default: '#f3e8ee', paper: '#bacdb0' },
+    success: { main: '#583e23' },
+  } as any,
   shape: {
     borderRadius: 16,
   },
   typography: {
-    fontFamily: 'Inter, Roboto, Arial, sans-serif',
+    fontFamily: '"Lexend", "Inter", Roboto, Arial, sans-serif',
     h1: { fontWeight: 700 },
     h2: { fontWeight: 700 },
     h3: { fontWeight: 700 },
     h4: { fontWeight: 700 },
     h5: { fontWeight: 700 },
     h6: { fontWeight: 700 },
-    button: { textTransform: 'none', fontWeight: 600 },
+    button: { textTransform: 'none', fontWeight: 200 },
+    body1: { fontWeight: 200 },
+    body2: { fontWeight: 200 },
   },
   components: {
     MuiButton: {

@@ -89,20 +89,27 @@ function App() {
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', backgroundImage: `url(${import.meta.env.BASE_URL}tea-leaves-139617_1280.jpg)`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-      <AppBar position="static" color="primary" elevation={3} sx={{ boxShadow: '0 2px 8px 0 rgba(56,142,60,0.10)' }}>
-        <Toolbar>
-          {HomeButton}
-          <LocalCafeIcon sx={{ mr: 1, fontSize: 32, color: 'success.main' }} />
-          <Typography variant="h5" component="div" sx={{ flexGrow: 1, fontWeight: 700, letterSpacing: 1 }}>
-            Tea Tracker
-          </Typography>
-        </Toolbar>
-      </AppBar>
+      {view !== VIEW_HOME && (
+        <AppBar position="static" color="primary" elevation={3} sx={{ boxShadow: '0 2px 8px 0 rgba(56,142,60,0.10)' }}>
+          <Toolbar>
+            {HomeButton}
+            <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="TeaMinder Logo" style={{ height: 32, marginRight: 8 }} />
+            <Typography variant="h5" component="div" sx={{ flexGrow: 1, fontWeight: 700, letterSpacing: 1 }}>
+              TeaMinder
+            </Typography>
+          </Toolbar>
+        </AppBar>
+      )}
       <Container maxWidth="sm" sx={{ py: 4 }}>
         <Paper sx={{ p: 2 }}>
           {view === VIEW_HOME && (
             <Stack spacing={3} alignItems="center">
-              <Typography variant="h5" gutterBottom>Welcome to Tea Tracker</Typography>
+              <Box textAlign="center">
+                <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="TeaMinder Logo" style={{ height: 80, marginBottom: 8 }} />
+                <Typography variant="h4" sx={{ fontWeight: 400, letterSpacing: 2, color: 'white' }}>
+                  TeaMinder
+                </Typography>
+              </Box>
               <Button variant="contained" size="large" fullWidth sx={{ minHeight: 56 }} onClick={() => setView(VIEW_LOG)}>
                 View Brewing Journal
               </Button>
