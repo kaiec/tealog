@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { AppBar, Toolbar, Typography, Container, Box, Paper, Button, Stack, IconButton, MenuItem, Select, InputLabel, FormControl } from '@mui/material'
+import { AppBar, Toolbar, Typography, Container, Box, Paper, Button, Stack, IconButton, MenuItem, Select, InputLabel, FormControl, Snackbar, Alert } from '@mui/material'
 import HomeIcon from '@mui/icons-material/Home'
 import TeaList from './components/TeaList'
 import BrewingList from './components/BrewingList'
@@ -22,6 +22,7 @@ function App() {
   const [teaListKey, setTeaListKey] = useState(0) // for forcing TeaList refresh
   const [brewingListKey, setBrewingListKey] = useState(0) // for forcing BrewingList refresh
   const [recentTeas, setRecentTeas] = useState<string[]>([])
+  const [snackbar, setSnackbar] = useState<{ open: boolean, message: string, action?: React.ReactNode }>({ open: false, message: '' })
 
   // Load teas for dropdown
   useEffect(() => {
@@ -60,6 +61,14 @@ function App() {
     setTeaListKey(k => k + 1)
   }
 
+  const showSnackbar = (message: string, action?: React.ReactNode) => {
+    setSnackbar({ open: true, message, action })
+  }
+
+  const handleSnackbarClose = () => {
+    setSnackbar(s => ({ ...s, open: false }))
+  }
+
   // Home button (not shown on home)
   const HomeButton = view !== VIEW_HOME ? (
     <IconButton color="inherit" onClick={() => setView(VIEW_HOME)}>
@@ -92,16 +101,16 @@ function App() {
           {view === VIEW_HOME && (
             <Stack spacing={3} alignItems="center">
               <Typography variant="h5" gutterBottom>Welcome to Tea Tracker</Typography>
-              <Button variant="contained" size="large" onClick={() => setView(VIEW_LOG)}>
+              <Button variant="contained" size="large" fullWidth sx={{ minHeight: 56 }} onClick={() => setView(VIEW_LOG)}>
                 View Brewing Journal
               </Button>
-              <Button variant="contained" size="large" onClick={handleAddTea}>
+              <Button variant="contained" size="large" fullWidth sx={{ minHeight: 56 }} onClick={handleAddTea}>
                 Add New Tea
               </Button>
-              <Button variant="contained" size="large" onClick={handleAddBrewing}>
+              <Button variant="contained" size="large" fullWidth sx={{ minHeight: 56 }} onClick={handleAddBrewing}>
                 Add New Brewing
               </Button>
-              <Button variant="contained" size="large" onClick={handleAddInfusionToLastBrewing}>
+              <Button variant="contained" size="large" fullWidth sx={{ minHeight: 56 }} onClick={handleAddInfusionToLastBrewing}>
                 Add Infusion to Last Brewing
               </Button>
             </Stack>
@@ -119,7 +128,7 @@ function App() {
               <TeaList key={teaListKey} onSelect={tea => {
                 setSelectedTea(tea)
                 setView(VIEW_TRACKER)
-              }} selectedTeaId={undefined} onTeaAdded={handleTeaAdded} />
+              }} selectedTeaId={undefined} onTeaAdded={handleTeaAdded} showSnackbar={showSnackbar} />
             </>
           )}
           {view === VIEW_TRACKER && (
@@ -145,12 +154,21 @@ function App() {
                 tea={selectedTea}
                 onSelect={setSelectedBrewing}
                 selectedBrewingId={selectedBrewing?.id}
+                showSnackbar={showSnackbar}
               />
-              <InfusionList brewing={selectedBrewing} />
+              <InfusionList brewing={selectedBrewing} showSnackbar={showSnackbar} />
             </>
           )}
         </Paper>
       </Container>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        message={snackbar.message}
+        action={snackbar.action}
+      />
     </Box>
   )
 }

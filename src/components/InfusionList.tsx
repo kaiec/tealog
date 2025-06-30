@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const defaultInfusion = { waterAmount: '', temperature: '', steepTime: '', tasteNotes: '' };
 
-const InfusionList: React.FC<{ brewing: Brewing | null }> = ({ brewing }) => {
+const InfusionList: React.FC<{ brewing: Brewing | null; showSnackbar?: (msg: string, action?: React.ReactNode) => void }> = ({ brewing, showSnackbar }) => {
   const [infusions, setInfusions] = useState<Infusion[]>([]);
   const [waterAmount, setWaterAmount] = useState('');
   const [temperature, setTemperature] = useState('');
@@ -19,6 +19,7 @@ const InfusionList: React.FC<{ brewing: Brewing | null }> = ({ brewing }) => {
   const [editTemperature, setEditTemperature] = useState('');
   const [editSteepTime, setEditSteepTime] = useState('');
   const [editTasteNotes, setEditTasteNotes] = useState('');
+  const lastDeletedInfusion = React.useRef<Infusion | null>(null);
 
   const prefillFromPreviousBrewing = async (brewing: Brewing, idx: number) => {
     const brewings = await getBrewingsByTea(brewing.teaId);
@@ -94,20 +95,34 @@ const InfusionList: React.FC<{ brewing: Brewing | null }> = ({ brewing }) => {
 
   const handleAdd = async () => {
     if (!brewing || !waterAmount.trim() || !temperature.trim() || !steepTime.trim()) return;
-    await addInfusion({
+    const newInfusion = {
       id: uuidv4(),
       brewingId: brewing.id,
       waterAmount: Number(waterAmount),
       temperature: Number(temperature),
       steepTime: Number(steepTime),
       tasteNotes,
-    });
+    };
+    await addInfusion(newInfusion);
     refresh();
+    showSnackbar && showSnackbar('Infusion added');
   };
 
   const handleDelete = async (id: string) => {
+    const infusionToDelete = infusions.find(i => i.id === id);
+    if (!infusionToDelete) return;
+    lastDeletedInfusion.current = infusionToDelete;
     await deleteInfusion(id);
     refresh();
+    showSnackbar && showSnackbar('Infusion deleted', (
+      <Button color="secondary" size="small" onClick={async () => {
+        if (lastDeletedInfusion.current) {
+          await addInfusion(lastDeletedInfusion.current);
+          refresh();
+          showSnackbar('Infusion restored');
+        }
+      }}>Undo</Button>
+    ));
   };
 
   const handleEdit = (infusion: Infusion) => {
@@ -137,6 +152,7 @@ const InfusionList: React.FC<{ brewing: Brewing | null }> = ({ brewing }) => {
       });
       setEditInfusion(null);
       refresh();
+      showSnackbar && showSnackbar('Infusion updated');
     }
   };
 

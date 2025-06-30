@@ -8,13 +8,14 @@ import { v4 as uuidv4 } from 'uuid';
 
 const unitOptions: TeaAmountUnit[] = ['g', 'tsp', 'bag'];
 
-const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => void; selectedBrewingId?: string }> = ({ tea, onSelect, selectedBrewingId }) => {
+const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => void; selectedBrewingId?: string; showSnackbar?: (msg: string, action?: React.ReactNode) => void }> = ({ tea, onSelect, selectedBrewingId, showSnackbar }) => {
   const [brewings, setBrewings] = useState<Brewing[]>([]);
   const [amount, setAmount] = useState('');
   const [unit, setUnit] = useState<TeaAmountUnit>('g');
   const [editBrewing, setEditBrewing] = useState<Brewing | null>(null);
   const [editAmount, setEditAmount] = useState('');
   const [editUnit, setEditUnit] = useState<TeaAmountUnit>('g');
+  const lastDeletedBrewing = React.useRef<Brewing | null>(null);
 
   const refresh = async (selectId?: string) => {
     if (tea) {
@@ -49,13 +50,27 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
   const handleAdd = async () => {
     if (!tea || !amount.trim() || isNaN(Number(amount))) return;
     const id = uuidv4();
-    await addBrewing({ id, teaId: tea.id, date: new Date().toISOString(), amount: Number(amount), unit });
+    const newBrewing = { id, teaId: tea.id, date: new Date().toISOString(), amount: Number(amount), unit };
+    await addBrewing(newBrewing);
     refresh(id);
+    showSnackbar && showSnackbar('Brewing added');
   };
 
   const handleDelete = async (id: string) => {
+    const brewingToDelete = brewings.find(b => b.id === id);
+    if (!brewingToDelete) return;
+    lastDeletedBrewing.current = brewingToDelete;
     await deleteBrewing(id);
     refresh();
+    showSnackbar && showSnackbar('Brewing deleted', (
+      <Button color="secondary" size="small" onClick={async () => {
+        if (lastDeletedBrewing.current) {
+          await addBrewing(lastDeletedBrewing.current);
+          refresh();
+          showSnackbar('Brewing restored');
+        }
+      }}>Undo</Button>
+    ));
   };
 
   const handleEdit = (brewing: Brewing) => {
@@ -69,6 +84,7 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
       await addBrewing({ ...editBrewing, amount: Number(editAmount), unit: editUnit });
       setEditBrewing(null);
       refresh();
+      showSnackbar && showSnackbar('Brewing updated');
     }
   };
 

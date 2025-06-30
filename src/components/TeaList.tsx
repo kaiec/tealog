@@ -6,7 +6,7 @@ import { getTeas, addTea, deleteTea } from '../db';
 import type { Tea } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
-const TeaList: React.FC<{ onSelect: (tea: Tea) => void; selectedTeaId?: string; onTeaAdded?: () => void }> = ({ onSelect, selectedTeaId, onTeaAdded }) => {
+const TeaList: React.FC<{ onSelect: (tea: Tea) => void; selectedTeaId?: string; onTeaAdded?: () => void; showSnackbar?: (msg: string, action?: React.ReactNode) => void }> = ({ onSelect, selectedTeaId, onTeaAdded, showSnackbar }) => {
   const [teas, setTeas] = useState<Tea[]>([]);
   const [name, setName] = useState('');
   const [type, setType] = useState('');
@@ -15,6 +15,8 @@ const TeaList: React.FC<{ onSelect: (tea: Tea) => void; selectedTeaId?: string; 
   const [editName, setEditName] = useState('');
   const [editType, setEditType] = useState('');
   const [editNotes, setEditNotes] = useState('');
+  const [search, setSearch] = useState('');
+  const lastDeletedTea = React.useRef<Tea | null>(null);
 
   const refresh = async () => {
     setTeas(await getTeas());
@@ -26,15 +28,29 @@ const TeaList: React.FC<{ onSelect: (tea: Tea) => void; selectedTeaId?: string; 
 
   const handleAdd = async () => {
     if (!name.trim()) return;
-    await addTea({ id: uuidv4(), name, type, notes });
+    const newTea = { id: uuidv4(), name, type, notes };
+    await addTea(newTea);
     setName(''); setType(''); setNotes('');
     refresh();
     if (onTeaAdded) onTeaAdded();
+    showSnackbar && showSnackbar('Tea added');
   };
 
   const handleDelete = async (id: string) => {
+    const teaToDelete = teas.find(t => t.id === id);
+    if (!teaToDelete) return;
+    lastDeletedTea.current = teaToDelete;
     await deleteTea(id);
     refresh();
+    showSnackbar && showSnackbar('Tea deleted', (
+      <Button color="secondary" size="small" onClick={async () => {
+        if (lastDeletedTea.current) {
+          await addTea(lastDeletedTea.current);
+          refresh();
+          showSnackbar('Tea restored');
+        }
+      }}>Undo</Button>
+    ));
   };
 
   const handleEdit = (tea: Tea) => {
@@ -49,12 +65,22 @@ const TeaList: React.FC<{ onSelect: (tea: Tea) => void; selectedTeaId?: string; 
       await addTea({ ...editTea, name: editName, type: editType, notes: editNotes });
       setEditTea(null);
       refresh();
+      showSnackbar && showSnackbar('Tea updated');
     }
   };
 
   return (
     <Box>
       <Typography variant="h6" gutterBottom>Teas</Typography>
+      <TextField
+        label="Search teas"
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        size="small"
+        fullWidth
+        sx={{ mb: 2 }}
+        placeholder="Type to filter by name or type"
+      />
       <Box display="flex" gap={1} mb={2}>
         <TextField label="Name" value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} size="small" />
         <TextField label="Type" value={type} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setType(e.target.value)} size="small" />
@@ -62,7 +88,10 @@ const TeaList: React.FC<{ onSelect: (tea: Tea) => void; selectedTeaId?: string; 
         <Button variant="contained" onClick={handleAdd}>Add</Button>
       </Box>
       <List>
-        {teas.map(tea => (
+        {teas.filter(tea =>
+          tea.name.toLowerCase().includes(search.toLowerCase()) ||
+          (tea.type && tea.type.toLowerCase().includes(search.toLowerCase()))
+        ).map(tea => (
           <ListItem
             key={tea.id}
             secondaryAction={
