@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { List, ListItem, ListItemText, IconButton, TextField, Button, Box, Typography, ListItemButton, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { getInfusionsByBrewing, addInfusion, deleteInfusion } from '../db';
+import { getInfusionsByBrewing, addInfusion, deleteInfusion, getBrewingsByTea } from '../db';
 import type { Infusion, Brewing } from '../types';
 import { v4 as uuidv4 } from 'uuid';
+
+const defaultInfusion = { waterAmount: '', temperature: '', steepTime: '', tasteNotes: '' };
 
 const InfusionList: React.FC<{ brewing: Brewing | null }> = ({ brewing }) => {
   const [infusions, setInfusions] = useState<Infusion[]>([]);
@@ -18,9 +20,71 @@ const InfusionList: React.FC<{ brewing: Brewing | null }> = ({ brewing }) => {
   const [editSteepTime, setEditSteepTime] = useState('');
   const [editTasteNotes, setEditTasteNotes] = useState('');
 
+  const prefillFromPreviousBrewing = async (brewing: Brewing, idx: number) => {
+    const brewings = await getBrewingsByTea(brewing.teaId);
+    // Only consider brewings before the current one (by date)
+    const previous = brewings
+      .filter(b => b.id !== brewing.id && b.date < brewing.date)
+      .sort((a, b) => b.date.localeCompare(a.date)); // most recent first
+    if (previous.length === 0) return defaultInfusion;
+    const lastBrewing = previous[0];
+    const prevInfusions = await getInfusionsByBrewing(lastBrewing.id);
+    let match = prevInfusions[idx];
+    if (!match && prevInfusions.length > 0) match = prevInfusions[prevInfusions.length - 1];
+    if (match) {
+      return {
+        waterAmount: match.waterAmount.toString(),
+        temperature: match.temperature.toString(),
+        steepTime: match.steepTime.toString(),
+        tasteNotes: match.tasteNotes || '',
+      };
+    }
+    return defaultInfusion;
+  };
+
   const refresh = async () => {
-    if (brewing) setInfusions(await getInfusionsByBrewing(brewing.id));
-    else setInfusions([]);
+    if (brewing) {
+      const infs = await getInfusionsByBrewing(brewing.id);
+      setInfusions(infs);
+      let prefill = defaultInfusion;
+      if (infs.length > 0) {
+        // Usual prefill logic for subsequent infusions
+        const idx = infs.length; // next infusion index (0-based)
+        let match = infs[idx];
+        if (!match && idx > 0) match = infs[idx - 1];
+        if (match) {
+          prefill = {
+            waterAmount: match.waterAmount.toString(),
+            temperature: match.temperature.toString(),
+            steepTime: match.steepTime.toString(),
+            tasteNotes: match.tasteNotes || '',
+          };
+        } else {
+          const last = infs[infs.length - 1];
+          prefill = last
+            ? {
+                waterAmount: last.waterAmount.toString(),
+                temperature: last.temperature.toString(),
+                steepTime: last.steepTime.toString(),
+                tasteNotes: last.tasteNotes || '',
+              }
+            : defaultInfusion;
+        }
+      } else if (brewing) {
+        // For the first infusion of a new brewing, prefill from previous brewing
+        prefill = await prefillFromPreviousBrewing(brewing, 0);
+      }
+      setWaterAmount(prefill.waterAmount);
+      setTemperature(prefill.temperature);
+      setSteepTime(prefill.steepTime);
+      setTasteNotes(prefill.tasteNotes);
+    } else {
+      setInfusions([]);
+      setWaterAmount('');
+      setTemperature('');
+      setSteepTime('');
+      setTasteNotes('');
+    }
   };
 
   useEffect(() => {
@@ -38,7 +102,6 @@ const InfusionList: React.FC<{ brewing: Brewing | null }> = ({ brewing }) => {
       steepTime: Number(steepTime),
       tasteNotes,
     });
-    setWaterAmount(''); setTemperature(''); setSteepTime(''); setTasteNotes('');
     refresh();
   };
 

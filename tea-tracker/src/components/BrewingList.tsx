@@ -17,8 +17,22 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
   const [editUnit, setEditUnit] = useState<TeaAmountUnit>('g');
 
   const refresh = async () => {
-    if (tea) setBrewings(await getBrewingsByTea(tea.id));
-    else setBrewings([]);
+    if (tea) {
+      const brewings = await getBrewingsByTea(tea.id);
+      setBrewings(brewings);
+      // Prefill with last brewing values
+      if (brewings.length > 0) {
+        setAmount(brewings[brewings.length - 1].amount.toString());
+        setUnit(brewings[brewings.length - 1].unit);
+      } else {
+        setAmount('');
+        setUnit('g');
+      }
+    } else {
+      setBrewings([]);
+      setAmount('');
+      setUnit('g');
+    }
   };
 
   useEffect(() => {
@@ -29,8 +43,6 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
   const handleAdd = async () => {
     if (!tea || !amount.trim() || isNaN(Number(amount))) return;
     await addBrewing({ id: uuidv4(), teaId: tea.id, date: new Date().toISOString(), amount: Number(amount), unit });
-    setAmount('');
-    setUnit('g');
     refresh();
   };
 
