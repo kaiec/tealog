@@ -16,17 +16,23 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
   const [editAmount, setEditAmount] = useState('');
   const [editUnit, setEditUnit] = useState<TeaAmountUnit>('g');
 
-  const refresh = async () => {
+  const refresh = async (selectId?: string) => {
     if (tea) {
-      const brewings = await getBrewingsByTea(tea.id);
+      let brewings = await getBrewingsByTea(tea.id);
+      brewings = brewings.sort((a, b) => b.date.localeCompare(a.date)); // newest first
       setBrewings(brewings);
       // Prefill with last brewing values
       if (brewings.length > 0) {
-        setAmount(brewings[brewings.length - 1].amount.toString());
-        setUnit(brewings[brewings.length - 1].unit);
+        setAmount(brewings[0].amount.toString());
+        setUnit(brewings[0].unit);
       } else {
         setAmount('');
         setUnit('g');
+      }
+      // If a new brewing was just added, select it
+      if (selectId) {
+        const newBrewing = brewings.find(b => b.id === selectId);
+        if (newBrewing) onSelect(newBrewing);
       }
     } else {
       setBrewings([]);
@@ -42,8 +48,9 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
 
   const handleAdd = async () => {
     if (!tea || !amount.trim() || isNaN(Number(amount))) return;
-    await addBrewing({ id: uuidv4(), teaId: tea.id, date: new Date().toISOString(), amount: Number(amount), unit });
-    refresh();
+    const id = uuidv4();
+    await addBrewing({ id, teaId: tea.id, date: new Date().toISOString(), amount: Number(amount), unit });
+    refresh(id);
   };
 
   const handleDelete = async (id: string) => {
