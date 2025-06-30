@@ -56,6 +56,9 @@ function App() {
       setSelectedTea(prev => prev) // trigger rerender
     }, 0)
   }
+  const handleTeaAdded = () => {
+    setTeaListKey(k => k + 1)
+  }
 
   // Home button (not shown on home)
   const HomeButton = view !== VIEW_HOME ? (
@@ -116,7 +119,7 @@ function App() {
               <TeaList key={teaListKey} onSelect={tea => {
                 setSelectedTea(tea)
                 setView(VIEW_TRACKER)
-              }} selectedTeaId={undefined} />
+              }} selectedTeaId={undefined} onTeaAdded={handleTeaAdded} />
             </>
           )}
           {view === VIEW_TRACKER && (

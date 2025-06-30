@@ -6,7 +6,7 @@ import { getTeas, addTea, deleteTea } from '../db';
 import type { Tea } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
-const TeaList: React.FC<{ onSelect: (tea: Tea) => void; selectedTeaId?: string }> = ({ onSelect, selectedTeaId }) => {
+const TeaList: React.FC<{ onSelect: (tea: Tea) => void; selectedTeaId?: string; onTeaAdded?: () => void }> = ({ onSelect, selectedTeaId, onTeaAdded }) => {
   const [teas, setTeas] = useState<Tea[]>([]);
   const [name, setName] = useState('');
   const [type, setType] = useState('');
@@ -29,6 +29,7 @@ const TeaList: React.FC<{ onSelect: (tea: Tea) => void; selectedTeaId?: string }
     await addTea({ id: uuidv4(), name, type, notes });
     setName(''); setType(''); setNotes('');
     refresh();
+    if (onTeaAdded) onTeaAdded();
   };
 
   const handleDelete = async (id: string) => {
