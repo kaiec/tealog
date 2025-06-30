@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
-import { AppBar, Toolbar, Typography, Container, Box, Paper, Button, Stack, IconButton, MenuItem, Select, InputLabel, FormControl, Snackbar, Alert } from '@mui/material'
+import { AppBar, Toolbar, Typography, Container, Box, Paper, Button, Stack, IconButton, MenuItem, Select, InputLabel, FormControl, Snackbar } from '@mui/material'
 import HomeIcon from '@mui/icons-material/Home'
-import LocalCafeIcon from '@mui/icons-material/LocalCafe'
 import TeaList from './components/TeaList'
 import BrewingList from './components/BrewingList'
 import InfusionList from './components/InfusionList'
