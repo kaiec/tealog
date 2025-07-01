@@ -202,7 +202,7 @@ function App() {
               }} />
             )}
             {view === VIEW_ADD_TEA && (
-              <TeaList key={teaListKey} onSelect={() => {}} selectedTeaId={undefined} onTeaAdded={handleTeaAdded} showSnackbar={showSnackbar} />
+              <TeaList key={teaListKey} selectedTeaId={undefined} onTeaAdded={handleTeaAdded} showSnackbar={showSnackbar} />
             )}
             {view === VIEW_TRACKER && (
               <>
@@ -239,7 +239,7 @@ function App() {
               <TeaDetails teaId={selectedTeaId} onBack={handleViewTeaList} onEdit={() => handleEditTea(selectedTeaId)} />
             )}
             {view === VIEW_EDIT_TEA && editTeaId && (
-              <TeaList key={editTeaId} onSelect={() => {}} selectedTeaId={editTeaId} onTeaAdded={id => {
+              <TeaList key={editTeaId} selectedTeaId={editTeaId} onTeaAdded={id => {
                 setEditTeaId(null)
                 if (id) {
                   setSelectedTeaId(id)

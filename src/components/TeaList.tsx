@@ -73,47 +73,6 @@ const TeaList: React.FC<{ selectedTeaId?: string; onTeaAdded?: (teaId: string) =
 
   const handleDeletePhoto = () => setPhoto(undefined);
 
-  const handleAdd = async () => {
-    if (!name.trim()) return;
-    const newTea = {
-      id: uuidv4(),
-      name,
-      type,
-      vendor: vendor || undefined,
-      description: description || undefined,
-      note: note || undefined,
-      rating: rating ?? undefined,
-      photo: photo,
-    };
-    await addTea(newTea);
-    setName(''); setType(''); setVendor(''); setDescription(''); setNote(''); setRating(null); setPhoto(undefined);
-    if (onTeaAdded) onTeaAdded(newTea.id);
-    showSnackbar && showSnackbar('Tea added');
-  };
-
-  const handleDelete = async (id: string) => {
-    const teaToDelete = await getTeas().then(teas => teas.find(t => t.id === id));
-    if (!teaToDelete) return;
-    await deleteTea(id);
-    showSnackbar && showSnackbar('Tea deleted', (
-      <Button color="secondary" size="small" onClick={async () => {
-        await addTea(teaToDelete);
-        showSnackbar('Tea restored');
-      }}>Undo</Button>
-    ));
-  };
-
-  const handleEdit = (tea: Tea) => {
-    setEditTea(tea);
-    setEditName(tea.name);
-    setEditType(tea.type || '');
-    setEditVendor(tea.vendor || '');
-    setEditDescription(tea.description || '');
-    setEditNote(tea.note || '');
-    setEditRating(tea.rating ?? null);
-    setEditPhoto(tea.photo);
-  };
-
   const handleEditSave = async () => {
     if (editTea) {
       await addTea({
