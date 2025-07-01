@@ -87,86 +87,94 @@ function App() {
   })
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', backgroundImage: `url(${import.meta.env.BASE_URL}tea-leaves-139617_1280.jpg)`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+    <Box sx={{ minHeight: '100vh', width: '100vw', overflowX: 'hidden', display: 'flex', flexDirection: 'column', bgcolor: 'background.default', backgroundImage: `url(${import.meta.env.BASE_URL}tea-leaves-139617_1280.jpg)`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
       {view !== VIEW_HOME && (
         <AppBar position="static" color="primary" elevation={3} sx={{ boxShadow: '0 2px 8px 0 rgba(56,142,60,0.10)' }}>
           <Toolbar>
             {HomeButton}
-            <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="TeaMinder Logo" style={{ height: 32, marginRight: 8 }} />
+            <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="TeaMinder Logo" style={{ height: 32, marginRight: 8, maxWidth: '100%' }} />
             <Typography variant="h5" component="div" sx={{ flexGrow: 1, fontWeight: 700, letterSpacing: 1 }}>
               TeaMinder
             </Typography>
           </Toolbar>
         </AppBar>
       )}
-      <Container maxWidth="sm" sx={{ py: 4 }}>
-        <Paper sx={{ p: 2 }}>
-          {view === VIEW_HOME && (
-            <Stack spacing={3} alignItems="center">
-              <Box textAlign="center">
-                <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="TeaMinder Logo" style={{ height: 80, marginBottom: 8 }} />
-                <Typography variant="h4" sx={{ fontWeight: 400, letterSpacing: 2, color: 'white' }}>
-                  TeaMinder
-                </Typography>
-              </Box>
-              <Button variant="contained" size="large" fullWidth sx={{ minHeight: 56 }} onClick={() => setView(VIEW_LOG)}>
-                View Brewing Journal
-              </Button>
-              <Button variant="contained" size="large" fullWidth sx={{ minHeight: 56 }} onClick={handleAddTea}>
-                Add New Tea
-              </Button>
-              <Button variant="contained" size="large" fullWidth sx={{ minHeight: 56 }} onClick={handleAddBrewing}>
-                Add New Brewing
-              </Button>
-              <Button variant="contained" size="large" fullWidth sx={{ minHeight: 56 }} onClick={handleAddInfusionToLastBrewing}>
-                Add Infusion to Last Brewing
-              </Button>
-            </Stack>
-          )}
-          {view === VIEW_LOG && (
-            <BrewingJournal onSelectBrewing={(brewing, tea) => {
-              setSelectedTea(tea)
-              setSelectedBrewing(brewing)
-              setView(VIEW_TRACKER)
-            }} />
-          )}
-          {view === VIEW_ADD_TEA && (
-            <>
-              <Typography variant="h6" gutterBottom>Add a New Tea</Typography>
-              <TeaList key={teaListKey} onSelect={tea => {
+      <Container maxWidth="sm" sx={{ flex: 1, display: 'flex', flexDirection: 'column', py: 4, minHeight: 0, width: '100%', maxWidth: '100vw' }}>
+        <Paper sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2, minHeight: 0, width: '100%', maxWidth: '100vw' }}>
+          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            {view === VIEW_HOME && (
+              <Stack spacing={3} alignItems="center" sx={{ flex: 1, justifyContent: 'center' }}>
+                <Box textAlign="center">
+                  <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="TeaMinder Logo" style={{ height: 80, marginBottom: 8, maxWidth: '100%' }} />
+                  <Typography variant="h4" sx={{ fontWeight: 400, letterSpacing: 2, color: 'white' }}>
+                    TeaMinder
+                  </Typography>
+                </Box>
+                <Button variant="contained" size="large" fullWidth sx={{ minHeight: 56 }} onClick={() => setView(VIEW_LOG)}>
+                  View Brewing Journal
+                </Button>
+                <Button variant="contained" size="large" fullWidth sx={{ minHeight: 56 }} onClick={handleAddTea}>
+                  Add New Tea
+                </Button>
+                <Button variant="contained" size="large" fullWidth sx={{ minHeight: 56 }} onClick={handleAddBrewing}>
+                  Add New Brewing
+                </Button>
+                <Button variant="contained" size="large" fullWidth sx={{ minHeight: 56 }} onClick={handleAddInfusionToLastBrewing}>
+                  Add Infusion to Last Brewing
+                </Button>
+              </Stack>
+            )}
+            {view === VIEW_LOG && (
+              <BrewingJournal onSelectBrewing={(brewing, tea) => {
                 setSelectedTea(tea)
+                setSelectedBrewing(brewing)
                 setView(VIEW_TRACKER)
-              }} selectedTeaId={undefined} onTeaAdded={handleTeaAdded} showSnackbar={showSnackbar} />
-            </>
-          )}
-          {view === VIEW_TRACKER && (
-            <>
-              <FormControl fullWidth sx={{ mb: 2 }}>
-                <InputLabel>Select Tea</InputLabel>
-                <Select
-                  value={selectedTea?.id || ''}
-                  label="Select Tea"
-                  onChange={e => {
-                    const tea = teas.find(t => t.id === e.target.value)
-                    setSelectedTea(tea || null)
-                    setSelectedBrewing(null)
-                  }}
-                >
-                  {sortedTeas.map(tea => (
-                    <MenuItem key={tea.id} value={tea.id}>{tea.name} {tea.type ? `(${tea.type})` : ''}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <BrewingList
-                key={brewingListKey}
-                tea={selectedTea}
-                onSelect={setSelectedBrewing}
-                selectedBrewingId={selectedBrewing?.id}
-                showSnackbar={showSnackbar}
-              />
-              <InfusionList brewing={selectedBrewing} showSnackbar={showSnackbar} />
-            </>
-          )}
+              }} />
+            )}
+            {view === VIEW_ADD_TEA && (
+              <>
+                <Typography variant="h6" gutterBottom>Add a New Tea</Typography>
+                <TeaList key={teaListKey} onSelect={tea => {
+                  setSelectedTea(tea)
+                  setView(VIEW_TRACKER)
+                }} selectedTeaId={undefined} onTeaAdded={handleTeaAdded} showSnackbar={showSnackbar} />
+              </>
+            )}
+            {view === VIEW_TRACKER && (
+              <>
+                <FormControl fullWidth sx={{ mb: 2 }}>
+                  <InputLabel>Select Tea</InputLabel>
+                  <Select
+                    value={selectedTea?.id || ''}
+                    label="Select Tea"
+                    onChange={e => {
+                      const tea = teas.find(t => t.id === e.target.value)
+                      setSelectedTea(tea || null)
+                      setSelectedBrewing(null)
+                    }}
+                  >
+                    {sortedTeas.map(tea => (
+                      <MenuItem key={tea.id} value={tea.id}>{tea.name} {tea.type ? `(${tea.type})` : ''}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <BrewingList
+                  key={brewingListKey}
+                  tea={selectedTea}
+                  onSelect={setSelectedBrewing}
+                  selectedBrewingId={selectedBrewing?.id}
+                  showSnackbar={showSnackbar}
+                />
+                <InfusionList brewing={selectedBrewing} showSnackbar={showSnackbar} />
+              </>
+            )}
+            {/* Empty state placeholder for any view with no content */}
+            {view !== VIEW_HOME && view !== VIEW_LOG && view !== VIEW_ADD_TEA && view !== VIEW_TRACKER && (
+              <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'text.secondary' }}>
+                <Typography variant="body1">No content to display.</Typography>
+              </Box>
+            )}
+          </Box>
         </Paper>
       </Container>
       <Snackbar
