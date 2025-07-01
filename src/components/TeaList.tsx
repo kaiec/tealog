@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { List, IconButton, TextField, Button, Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Card, CardContent, CardActions, MenuItem, Select, InputLabel, FormControl, Rating } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
+import { TextField, Button, Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Select, InputLabel, FormControl, Rating } from '@mui/material';
 import { getTeas, addTea, deleteTea } from '../db';
 import type { Tea } from '../types';
 import { v4 as uuidv4 } from 'uuid';
-import SpaIcon from '@mui/icons-material/Spa';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 
 const teaTypeOptions = [
@@ -19,7 +18,7 @@ const teaTypeOptions = [
 
 const placeholderImg = `${import.meta.env.BASE_URL}tea-placeholder.png`;
 
-const TeaList: React.FC<{ onSelect: (tea: Tea) => void; selectedTeaId?: string; onTeaAdded?: (teaId: string) => void; showSnackbar?: (msg: string, action?: React.ReactNode) => void }> = ({ onSelect, selectedTeaId, onTeaAdded, showSnackbar }) => {
+const TeaList: React.FC<{ selectedTeaId?: string; onTeaAdded?: (teaId: string) => void; showSnackbar?: (msg: string, action?: React.ReactNode) => void }> = ({ selectedTeaId, onTeaAdded, showSnackbar }) => {
   const [name, setName] = useState('');
   const [type, setType] = useState('');
   const [vendor, setVendor] = useState('');
