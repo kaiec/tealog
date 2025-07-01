@@ -7,6 +7,8 @@ import InfusionList from './components/InfusionList'
 import BrewingJournal from './components/BrewingJournal'
 import { getTeas } from './db'
 import type { Tea, Brewing } from './types'
+import MenuIcon from '@mui/icons-material/Menu'
+import Menu from '@mui/material/Menu'
 
 // Navigation states
 const VIEW_HOME = 'home'
@@ -23,6 +25,7 @@ function App() {
   const [brewingListKey, setBrewingListKey] = useState(0) // for forcing BrewingList refresh
   const [recentTeas, setRecentTeas] = useState<string[]>([])
   const [snackbar, setSnackbar] = useState<{ open: boolean, message: string, action?: React.ReactNode }>({ open: false, message: '' })
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
 
   // Load teas for dropdown
   useEffect(() => {
@@ -69,12 +72,12 @@ function App() {
     setSnackbar(s => ({ ...s, open: false }))
   }
 
-  // Home button (not shown on home)
-  const HomeButton = view !== VIEW_HOME ? (
-    <IconButton color="inherit" onClick={() => setView(VIEW_HOME)}>
-      <HomeIcon />
-    </IconButton>
-  ) : null
+  const openMenu = (event: React.MouseEvent<HTMLElement>) => setMenuAnchorEl(event.currentTarget)
+  const closeMenu = () => setMenuAnchorEl(null)
+  const handleMenuSelect = (viewName: string) => {
+    setView(viewName)
+    closeMenu()
+  }
 
   // Sorted teas: most recently used on top
   const sortedTeas = [...teas].sort((a, b) => {
@@ -91,11 +94,20 @@ function App() {
       {view !== VIEW_HOME && (
         <AppBar position="static" color="primary" elevation={3} sx={{ boxShadow: '0 2px 8px 0 rgba(56,142,60,0.10)' }}>
           <Toolbar>
-            {HomeButton}
             <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="TeaMinder Logo" style={{ height: 32, marginRight: 8, maxWidth: '100%' }} />
-            <Typography variant="h5" component="div" sx={{ flexGrow: 1, fontWeight: 700, letterSpacing: 1 }}>
+            <Typography variant="h5" component="div" sx={{ flexGrow: 1, fontWeight: 400, letterSpacing: 1 }}>
               TeaMinder
             </Typography>
+            <IconButton color="inherit" edge="end" onClick={openMenu}>
+              <MenuIcon />
+            </IconButton>
+            <Menu anchorEl={menuAnchorEl} open={Boolean(menuAnchorEl)} onClose={closeMenu} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} transformOrigin={{ vertical: 'top', horizontal: 'right' }}>
+              <MenuItem onClick={() => handleMenuSelect(VIEW_HOME)}>Home</MenuItem>
+              <MenuItem onClick={() => handleMenuSelect(VIEW_LOG)}>Brewing Journal</MenuItem>
+              <MenuItem onClick={() => handleMenuSelect(VIEW_ADD_TEA)}>Add New Tea</MenuItem>
+              <MenuItem onClick={() => handleMenuSelect(VIEW_TRACKER)}>Add New Brewing</MenuItem>
+              <MenuItem onClick={handleAddInfusionToLastBrewing}>Add Infusion to Last Brewing</MenuItem>
+            </Menu>
           </Toolbar>
         </AppBar>
       )}
