@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, Typography, Box, Rating, Paper, List, ListItemButton, TextField, IconButton, Tooltip } from '@mui/material';
+import { Card, CardContent, Typography, Box, Paper, List, ListItemButton, TextField, IconButton, Tooltip } from '@mui/material';
 import { getTeas, getAllBrewings } from '../db';
 import type { Tea as TeaBase } from '../types';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
