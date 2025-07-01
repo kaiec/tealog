@@ -2,7 +2,11 @@ export interface Tea {
   id: string;
   name: string;
   type?: string;
-  notes?: string;
+  vendor?: string;
+  description?: string;
+  note?: string;
+  rating?: number;
+  notes?: string; // legacy, for backwards compatibility
 }
 
 export type TeaAmountUnit = 'g' | 'tsp' | 'bag';

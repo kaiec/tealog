@@ -160,7 +160,7 @@ const InfusionList: React.FC<{ brewing: Brewing | null; showSnackbar?: (msg: str
 
   return (
     <Box mt={4}>
-      <Typography variant="h6" gutterBottom>Infusions</Typography>
+      <Typography variant="h6" gutterBottom>Add Infusion</Typography>
       <Box display="flex" gap={1} mb={2} flexWrap="wrap">
         <TextField label="Water (ml)" value={waterAmount} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWaterAmount(e.target.value)} size="small" type="number" />
         <TextField label="Temp (°C)" value={temperature} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTemperature(e.target.value)} size="small" type="number" />
@@ -168,6 +168,7 @@ const InfusionList: React.FC<{ brewing: Brewing | null; showSnackbar?: (msg: str
         <TextField label="Taste Notes" value={tasteNotes} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTasteNotes(e.target.value)} size="small" />
         <Button variant="contained" onClick={handleAdd}>Add</Button>
       </Box>
+      <Typography variant="h6" gutterBottom>Infusions</Typography>
       <List>
         {infusions.map((infusion: Infusion) => (
           <ListItem

@@ -92,7 +92,7 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
 
   return (
     <Box mt={4}>
-      <Typography variant="h6" gutterBottom>Brewings for {tea.name}</Typography>
+      <Typography variant="h6" gutterBottom>Add Brewing</Typography>
       <Box display="flex" gap={1} mb={2}>
         <TextField label="Amount" value={amount} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAmount(e.target.value)} size="small" type="number" />
         <FormControl size="small" sx={{ minWidth: 80 }}>
@@ -103,6 +103,7 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
         </FormControl>
         <Button variant="contained" onClick={handleAdd}>Add</Button>
       </Box>
+      <Typography variant="h6" gutterBottom>Brewings for {tea.name}</Typography>
       <List>
         {brewings.map((brewing: Brewing) => (
           <ListItem

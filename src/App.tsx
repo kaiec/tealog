@@ -4,6 +4,8 @@ import TeaList from './components/TeaList'
 import BrewingList from './components/BrewingList'
 import InfusionList from './components/InfusionList'
 import BrewingJournal from './components/BrewingJournal'
+import TeaListView from './components/TeaListView'
+import TeaDetails from './components/TeaDetails'
 import { getTeas } from './db'
 import type { Tea, Brewing } from './types'
 import MenuIcon from '@mui/icons-material/Menu'
@@ -14,6 +16,9 @@ const VIEW_HOME = 'home'
 const VIEW_LOG = 'log'
 const VIEW_TRACKER = 'tracker'
 const VIEW_ADD_TEA = 'add-tea'
+const VIEW_TEA_LIST = 'tea-list'
+const VIEW_TEA_DETAILS = 'tea-details'
+const VIEW_EDIT_TEA = 'edit-tea'
 
 function App() {
   const [selectedTea, setSelectedTea] = useState<Tea | null>(null)
@@ -26,6 +31,8 @@ function App() {
   const [snackbar, setSnackbar] = useState<{ open: boolean, message: string, action?: React.ReactNode }>({ open: false, message: '' })
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
   const [updateAvailable, setUpdateAvailable] = useState(false)
+  const [selectedTeaId, setSelectedTeaId] = useState<string | null>(null)
+  const [editTeaId, setEditTeaId] = useState<string | null>(null)
 
   // Load teas for dropdown
   useEffect(() => {
@@ -48,6 +55,7 @@ function App() {
   // Set view and push to history
   const setView = (newView: string) => {
     setViewState(newView)
+    if (newView !== VIEW_EDIT_TEA) setEditTeaId(null)
     window.history.pushState({ view: newView }, '')
   }
 
@@ -85,8 +93,12 @@ function App() {
       setSelectedTea(prev => prev) // trigger rerender
     }, 0)
   }
-  const handleTeaAdded = () => {
+  const handleTeaAdded = (newTeaId?: string) => {
     setTeaListKey(k => k + 1)
+    if (newTeaId) {
+      setSelectedTeaId(newTeaId)
+      setView(VIEW_TEA_DETAILS)
+    }
   }
 
   const showSnackbar = (message: string, action?: React.ReactNode) => {
@@ -114,6 +126,23 @@ function App() {
     return aIdx - bIdx
   })
 
+  // Add a handler for viewing tea list
+  const handleViewTeaList = () => {
+    setView(VIEW_TEA_LIST)
+    setSelectedTeaId(null)
+  }
+
+  // Add a handler for viewing tea details
+  const handleViewTeaDetails = (teaId: string) => {
+    setSelectedTeaId(teaId)
+    setView(VIEW_TEA_DETAILS)
+  }
+
+  const handleEditTea = (teaId: string) => {
+    setEditTeaId(teaId)
+    setView(VIEW_EDIT_TEA)
+  }
+
   return (
     <Box sx={{ minHeight: '100vh', width: '100vw', overflowX: 'hidden', display: 'flex', flexDirection: 'column', bgcolor: 'background.default', backgroundImage: `url(${import.meta.env.BASE_URL}tea-leaves-139617_1280.jpg)`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
       {view !== VIEW_HOME && (
@@ -128,10 +157,11 @@ function App() {
             </IconButton>
             <Menu anchorEl={menuAnchorEl} open={Boolean(menuAnchorEl)} onClose={closeMenu} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} transformOrigin={{ vertical: 'top', horizontal: 'right' }}>
               <MenuItem onClick={() => handleMenuSelect(VIEW_HOME)}>Home</MenuItem>
-              <MenuItem onClick={() => handleMenuSelect(VIEW_LOG)}>Brewing Journal</MenuItem>
+              <MenuItem onClick={() => handleMenuSelect(VIEW_LOG)}>View Brewing Journal</MenuItem>
               <MenuItem onClick={() => handleMenuSelect(VIEW_ADD_TEA)}>Add New Tea</MenuItem>
               <MenuItem onClick={() => handleMenuSelect(VIEW_TRACKER)}>Add New Brewing</MenuItem>
               <MenuItem onClick={handleAddInfusionToLastBrewing}>Add Infusion to Last Brewing</MenuItem>
+              <MenuItem onClick={() => handleMenuSelect(VIEW_TEA_LIST)}>View All Teas</MenuItem>
             </Menu>
           </Toolbar>
         </AppBar>
@@ -159,6 +189,9 @@ function App() {
                 <Button variant="contained" size="large" fullWidth sx={{ minHeight: 56 }} onClick={handleAddInfusionToLastBrewing}>
                   Add Infusion to Last Brewing
                 </Button>
+                <Button variant="contained" size="large" fullWidth sx={{ minHeight: 56 }} onClick={handleViewTeaList}>
+                  View All Teas
+                </Button>
               </Stack>
             )}
             {view === VIEW_LOG && (
@@ -169,13 +202,7 @@ function App() {
               }} />
             )}
             {view === VIEW_ADD_TEA && (
-              <>
-                <Typography variant="h6" gutterBottom>Add a New Tea</Typography>
-                <TeaList key={teaListKey} onSelect={tea => {
-                  setSelectedTea(tea)
-                  setView(VIEW_TRACKER)
-                }} selectedTeaId={undefined} onTeaAdded={handleTeaAdded} showSnackbar={showSnackbar} />
-              </>
+              <TeaList key={teaListKey} onSelect={() => {}} selectedTeaId={undefined} onTeaAdded={handleTeaAdded} showSnackbar={showSnackbar} />
             )}
             {view === VIEW_TRACKER && (
               <>
@@ -205,8 +232,23 @@ function App() {
                 <InfusionList brewing={selectedBrewing} showSnackbar={showSnackbar} />
               </>
             )}
+            {view === VIEW_TEA_LIST && (
+              <TeaListView onSelectTea={handleViewTeaDetails} />
+            )}
+            {view === VIEW_TEA_DETAILS && selectedTeaId && (
+              <TeaDetails teaId={selectedTeaId} onBack={handleViewTeaList} onEdit={() => handleEditTea(selectedTeaId)} />
+            )}
+            {view === VIEW_EDIT_TEA && editTeaId && (
+              <TeaList key={editTeaId} onSelect={() => {}} selectedTeaId={editTeaId} onTeaAdded={id => {
+                setEditTeaId(null)
+                if (id) {
+                  setSelectedTeaId(id)
+                  setView(VIEW_TEA_DETAILS)
+                }
+              }} showSnackbar={showSnackbar} />
+            )}
             {/* Empty state placeholder for any view with no content */}
-            {view !== VIEW_HOME && view !== VIEW_LOG && view !== VIEW_ADD_TEA && view !== VIEW_TRACKER && (
+            {view !== VIEW_HOME && view !== VIEW_LOG && view !== VIEW_ADD_TEA && view !== VIEW_TRACKER && view !== VIEW_TEA_LIST && view !== VIEW_TEA_DETAILS && view !== VIEW_EDIT_TEA && (
               <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'text.secondary' }}>
                 <Typography variant="body1">No content to display.</Typography>
               </Box>
