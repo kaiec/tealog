@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material'
+import type { PaletteOptions } from '@mui/material'
 import { registerSW } from './serviceWorkerRegistration'
 
 const theme = createTheme({
@@ -11,7 +12,7 @@ const theme = createTheme({
     secondary: { main: '#b09a82' },
     background: { default: '#f3e8ee', paper: '#bacdb0' },
     success: { main: '#583e23' },
-  } as any,
+  } as PaletteOptions,
   shape: {
     borderRadius: 16,
   },

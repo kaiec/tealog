@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { List, ListItem, ListItemText, IconButton, TextField, Button, Box, Typography, ListItemButton, Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
+import type { SelectChangeEvent } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { getBrewingsByTea, addBrewing, deleteBrewing } from '../db';
@@ -17,7 +18,7 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
   const [editUnit, setEditUnit] = useState<TeaAmountUnit>('g');
   const lastDeletedBrewing = React.useRef<Brewing | null>(null);
 
-  const refresh = async (selectId?: string) => {
+  const refresh = useCallback(async (selectId?: string) => {
     if (tea) {
       let brewings = await getBrewingsByTea(tea.id);
       brewings = brewings.sort((a: Brewing, b: Brewing) => b.date.localeCompare(a.date)); // newest first
@@ -40,12 +41,11 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
       setAmount('');
       setUnit('g');
     }
-  };
+  }, [tea, onSelect]);
 
   useEffect(() => {
     refresh();
-    // eslint-disable-next-line
-  }, [tea]);
+  }, [refresh]);
 
   const handleAdd = async () => {
     if (!tea || !amount.trim() || isNaN(Number(amount))) return;
@@ -53,6 +53,7 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
     const newBrewing = { id, teaId: tea.id, date: new Date().toISOString(), amount: Number(amount), unit };
     await addBrewing(newBrewing);
     refresh(id);
+    // eslint-disable-next-line
     showSnackbar && showSnackbar('Brewing added');
   };
 
@@ -62,6 +63,7 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
     lastDeletedBrewing.current = brewingToDelete;
     await deleteBrewing(id);
     refresh();
+    // eslint-disable-next-line
     showSnackbar && showSnackbar('Brewing deleted', (
       <Button color="secondary" size="small" onClick={async () => {
         if (lastDeletedBrewing.current) {
@@ -84,6 +86,7 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
       await addBrewing({ ...editBrewing, amount: Number(editAmount), unit: editUnit });
       setEditBrewing(null);
       refresh();
+    // eslint-disable-next-line
       showSnackbar && showSnackbar('Brewing updated');
     }
   };
@@ -97,7 +100,7 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
         <TextField label="Amount" value={amount} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAmount(e.target.value)} size="small" type="number" />
         <FormControl size="small" sx={{ minWidth: 80 }}>
           <InputLabel>Unit</InputLabel>
-          <Select value={unit} label="Unit" onChange={(e: any) => setUnit(e.target.value as TeaAmountUnit)}>
+          <Select value={unit} label="Unit" onChange={(e: SelectChangeEvent<TeaAmountUnit>) => setUnit(e.target.value as TeaAmountUnit)}>
             {unitOptions.map(u => <MenuItem key={u} value={u}>{u}</MenuItem>)}
           </Select>
         </FormControl>

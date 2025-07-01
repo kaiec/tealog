@@ -91,6 +91,7 @@ const TeaList: React.FC<{ selectedTeaId?: string; onTeaAdded?: (teaId?: string) 
         inStash: editInStash,
       });
       setEditTea(null);
+      // eslint-disable-next-line
       showSnackbar && showSnackbar('Tea updated');
       if (onTeaAdded) onTeaAdded(editTea.id);
     }
@@ -153,6 +154,7 @@ const TeaList: React.FC<{ selectedTeaId?: string; onTeaAdded?: (teaId?: string) 
             await addTea(newTea);
             setName(''); setType(''); setVendor(''); setDescription(''); setNote(''); setRating(null); setPhoto(undefined); setInStash(true);
             if (onTeaAdded) onTeaAdded(newTea.id);
+            // eslint-disable-next-line
             showSnackbar && showSnackbar(selectedTeaId ? 'Tea updated' : 'Tea added');
           }}>{selectedTeaId ? 'Save' : 'Add'}</Button>
           <Button variant="outlined" color="secondary" onClick={() => {

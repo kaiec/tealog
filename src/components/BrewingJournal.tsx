@@ -17,7 +17,7 @@ const BrewingJournal: React.FC<BrewingJournalProps> = ({ onSelectBrewing }) => {
   useEffect(() => {
     const fetchAll = async () => {
       const teas = await getTeas();
-      let all: { tea: Tea; brewing: Brewing; infusions: Infusion[] }[] = [];
+      const all: { tea: Tea; brewing: Brewing; infusions: Infusion[] }[] = [];
       for (const tea of teas) {
         const brewings = await getBrewingsByTea(tea.id);
         for (const brewing of brewings) {

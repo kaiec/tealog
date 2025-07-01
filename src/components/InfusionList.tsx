@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { List, ListItem, ListItemText, IconButton, TextField, Button, Box, Typography, ListItemButton, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -43,7 +43,7 @@ const InfusionList: React.FC<{ brewing: Brewing | null; showSnackbar?: (msg: str
     return defaultInfusion;
   };
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     if (brewing) {
       const infs = await getInfusionsByBrewing(brewing.id);
       setInfusions(infs);
@@ -86,12 +86,11 @@ const InfusionList: React.FC<{ brewing: Brewing | null; showSnackbar?: (msg: str
       setSteepTime('');
       setTasteNotes('');
     }
-  };
+  }, [brewing]);
 
   useEffect(() => {
     refresh();
-    // eslint-disable-next-line
-  }, [brewing]);
+  }, [refresh]);
 
   const handleAdd = async () => {
     if (!brewing || !waterAmount.trim() || !temperature.trim() || !steepTime.trim()) return;
@@ -105,6 +104,7 @@ const InfusionList: React.FC<{ brewing: Brewing | null; showSnackbar?: (msg: str
     };
     await addInfusion(newInfusion);
     refresh();
+    // eslint-disable-next-line
     showSnackbar && showSnackbar('Infusion added');
   };
 
@@ -114,6 +114,7 @@ const InfusionList: React.FC<{ brewing: Brewing | null; showSnackbar?: (msg: str
     lastDeletedInfusion.current = infusionToDelete;
     await deleteInfusion(id);
     refresh();
+    // eslint-disable-next-line
     showSnackbar && showSnackbar('Infusion deleted', (
       <Button color="secondary" size="small" onClick={async () => {
         if (lastDeletedInfusion.current) {
@@ -152,6 +153,7 @@ const InfusionList: React.FC<{ brewing: Brewing | null; showSnackbar?: (msg: str
       });
       setEditInfusion(null);
       refresh();
+      // eslint-disable-next-line
       showSnackbar && showSnackbar('Infusion updated');
     }
   };
