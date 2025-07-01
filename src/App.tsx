@@ -18,7 +18,7 @@ const VIEW_ADD_TEA = 'add-tea'
 function App() {
   const [selectedTea, setSelectedTea] = useState<Tea | null>(null)
   const [selectedBrewing, setSelectedBrewing] = useState<Brewing | null>(null)
-  const [view, setView] = useState(VIEW_HOME)
+  const [view, setViewState] = useState(VIEW_HOME)
   const [teas, setTeas] = useState<Tea[]>([])
   const [teaListKey, setTeaListKey] = useState(0) // for forcing TeaList refresh
   const [brewingListKey, setBrewingListKey] = useState(0) // for forcing BrewingList refresh
@@ -43,6 +43,25 @@ function App() {
     const handler = () => setUpdateAvailable(true)
     window.addEventListener('pwa-update-available', handler)
     return () => window.removeEventListener('pwa-update-available', handler)
+  }, [])
+
+  // Set view and push to history
+  const setView = (newView: string) => {
+    setViewState(newView)
+    window.history.pushState({ view: newView }, '')
+  }
+
+  // On mount, set initial state and listen for popstate
+  useEffect(() => {
+    // Set initial state
+    window.history.replaceState({ view: VIEW_HOME }, '')
+    const onPopState = (event: PopStateEvent) => {
+      if (event.state && event.state.view) {
+        setViewState(event.state.view)
+      }
+    }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
   }, [])
 
   // Home screen actions
