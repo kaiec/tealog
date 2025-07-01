@@ -96,18 +96,6 @@ const TeaList: React.FC<{ selectedTeaId?: string; onTeaAdded?: (teaId?: string) 
     }
   };
 
-  const handleEdit = (tea: Tea) => {
-    setEditTea(tea);
-    setEditName(tea.name);
-    setEditType(tea.type || '');
-    setEditVendor(tea.vendor || '');
-    setEditDescription(tea.description || '');
-    setEditNote(tea.note || '');
-    setEditRating(tea.rating ?? null);
-    setEditPhoto(tea.photo);
-    setEditInStash(tea.inStash !== false);
-  };
-
   return (
     <Box>
       <Typography variant="h6" gutterBottom>{selectedTeaId ? 'Edit Tea' : 'Add a New Tea'}</Typography>

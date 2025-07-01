@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { AppBar, Toolbar, Typography, Container, Box, Paper, Button, Stack, IconButton, MenuItem, Select, InputLabel, FormControl, Snackbar, Fab } from '@mui/material'
+import { AppBar, Toolbar, Typography, Container, Box, Paper, Button, Stack, IconButton, MenuItem, Select, InputLabel, FormControl, Snackbar } from '@mui/material'
 import TeaList from './components/TeaList'
 import BrewingList from './components/BrewingList'
 import InfusionList from './components/InfusionList'
@@ -99,7 +99,7 @@ function App() {
       setSelectedTea(prev => prev) // trigger rerender
     }, 0)
   }
-  const handleTeaAdded = (newTeaId?: string) => {
+  const handleTeaAdded = () => {
     setTeaListKey(k => k + 1)
     setView(VIEW_TEA_LIST)
   }
