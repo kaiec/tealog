@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { AppBar, Toolbar, Typography, Container, Box, Paper, Button, Stack, IconButton, MenuItem, Select, InputLabel, FormControl, Snackbar } from '@mui/material'
+import { AppBar, Toolbar, Typography, Container, Box, Paper, Button, Stack, IconButton, MenuItem, Select, InputLabel, FormControl, Snackbar, Fab } from '@mui/material'
 import TeaList from './components/TeaList'
 import BrewingList from './components/BrewingList'
 import InfusionList from './components/InfusionList'
@@ -10,6 +10,12 @@ import { getTeas } from './db'
 import type { Tea, Brewing } from './types'
 import MenuIcon from '@mui/icons-material/Menu'
 import Menu from '@mui/material/Menu'
+import AddIcon from '@mui/icons-material/Add'
+import SpeedDial from '@mui/material/SpeedDial'
+import SpeedDialAction from '@mui/material/SpeedDialAction'
+import LocalCafeIcon from '@mui/icons-material/LocalCafe'
+import SpaIcon from '@mui/icons-material/Spa'
+import WaterDropIcon from '@mui/icons-material/WaterDrop'
 
 // Navigation states
 const VIEW_HOME = 'home'
@@ -177,18 +183,32 @@ function App() {
                 <Button variant="contained" size="large" fullWidth sx={{ minHeight: 56 }} onClick={() => setView(VIEW_LOG)}>
                   View Brewing Journal
                 </Button>
-                <Button variant="contained" size="large" fullWidth sx={{ minHeight: 56 }} onClick={handleAddTea}>
-                  Add New Tea
-                </Button>
-                <Button variant="contained" size="large" fullWidth sx={{ minHeight: 56 }} onClick={handleAddBrewing}>
-                  Add New Brewing
-                </Button>
-                <Button variant="contained" size="large" fullWidth sx={{ minHeight: 56 }} onClick={handleAddInfusionToLastBrewing}>
-                  Add Infusion to Last Brewing
-                </Button>
                 <Button variant="contained" size="large" fullWidth sx={{ minHeight: 56 }} onClick={handleViewTeaList}>
                   View All Teas
                 </Button>
+                <Box sx={{ position: 'fixed', bottom: 24, right: 24, zIndex: 1200 }}>
+                  <SpeedDial
+                    ariaLabel="Add actions"
+                    icon={<AddIcon />}
+                    direction="up"
+                  >
+                    <SpeedDialAction
+                      icon={<SpaIcon />}
+                      tooltipTitle="Add Tea"
+                      onClick={handleAddTea}
+                    />
+                    <SpeedDialAction
+                      icon={<LocalCafeIcon />}
+                      tooltipTitle="Add Brewing"
+                      onClick={handleAddBrewing}
+                    />
+                    <SpeedDialAction
+                      icon={<WaterDropIcon />}
+                      tooltipTitle="Add Infusion"
+                      onClick={handleAddInfusionToLastBrewing}
+                    />
+                  </SpeedDial>
+                </Box>
               </Stack>
             )}
             {view === VIEW_LOG && (
@@ -230,7 +250,7 @@ function App() {
               </>
             )}
             {view === VIEW_TEA_LIST && (
-              <TeaListView onSelectTea={handleViewTeaDetails} />
+              <TeaListView onSelectTea={handleViewTeaDetails} onAddTea={handleAddTea} />
             )}
             {view === VIEW_TEA_DETAILS && selectedTeaId && (
               <TeaDetails

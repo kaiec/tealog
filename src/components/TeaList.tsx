@@ -18,7 +18,7 @@ const teaTypeOptions = [
 
 const placeholderImg = `${import.meta.env.BASE_URL}tea-placeholder.png`;
 
-const TeaList: React.FC<{ selectedTeaId?: string; onTeaAdded?: (teaId: string) => void; showSnackbar?: (msg: string, action?: React.ReactNode) => void }> = ({ selectedTeaId, onTeaAdded, showSnackbar }) => {
+const TeaList: React.FC<{ selectedTeaId?: string; onTeaAdded?: (teaId?: string) => void; showSnackbar?: (msg: string, action?: React.ReactNode) => void }> = ({ selectedTeaId, onTeaAdded, showSnackbar }) => {
   const [name, setName] = useState('');
   const [type, setType] = useState('');
   const [vendor, setVendor] = useState('');
@@ -148,24 +148,30 @@ const TeaList: React.FC<{ selectedTeaId?: string; onTeaAdded?: (teaId: string) =
           control={<Checkbox checked={inStash} onChange={e => setInStash(e.target.checked)} />}
           label="Currently in stash"
         />
-        <Button variant="contained" onClick={async () => {
-          if (!name.trim()) return;
-          const newTea = {
-            id: selectedTeaId || uuidv4(),
-            name,
-            type,
-            vendor: vendor || undefined,
-            description: description || undefined,
-            note: note || undefined,
-            rating: rating ?? undefined,
-            photo: photo,
-            inStash: inStash,
-          };
-          await addTea(newTea);
-          setName(''); setType(''); setVendor(''); setDescription(''); setNote(''); setRating(null); setPhoto(undefined); setInStash(true);
-          if (onTeaAdded) onTeaAdded(newTea.id);
-          showSnackbar && showSnackbar(selectedTeaId ? 'Tea updated' : 'Tea added');
-        }}>{selectedTeaId ? 'Save' : 'Add'}</Button>
+        <Box display="flex" gap={1}>
+          <Button variant="contained" onClick={async () => {
+            if (!name.trim()) return;
+            const newTea = {
+              id: selectedTeaId || uuidv4(),
+              name,
+              type,
+              vendor: vendor || undefined,
+              description: description || undefined,
+              note: note || undefined,
+              rating: rating ?? undefined,
+              photo: photo,
+              inStash: inStash,
+            };
+            await addTea(newTea);
+            setName(''); setType(''); setVendor(''); setDescription(''); setNote(''); setRating(null); setPhoto(undefined); setInStash(true);
+            if (onTeaAdded) onTeaAdded(newTea.id);
+            showSnackbar && showSnackbar(selectedTeaId ? 'Tea updated' : 'Tea added');
+          }}>{selectedTeaId ? 'Save' : 'Add'}</Button>
+          <Button variant="outlined" color="secondary" onClick={() => {
+            setName(''); setType(''); setVendor(''); setDescription(''); setNote(''); setRating(null); setPhoto(undefined); setInStash(true);
+            if (onTeaAdded) onTeaAdded(undefined);
+          }}>Cancel</Button>
+        </Box>
       </Box>
       <Dialog open={!!editTea} onClose={() => setEditTea(null)}>
         <DialogTitle>Edit Tea</DialogTitle>
@@ -217,7 +223,7 @@ const TeaList: React.FC<{ selectedTeaId?: string; onTeaAdded?: (teaId: string) =
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditTea(null)}>Cancel</Button>
+          <Button onClick={() => setEditTea(null)} color="secondary">Cancel</Button>
           <Button onClick={handleEditSave} variant="contained">Save</Button>
         </DialogActions>
       </Dialog>

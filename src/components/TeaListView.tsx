@@ -4,10 +4,11 @@ import { getTeas, getAllBrewings } from '../db';
 import type { Tea as TeaBase } from '../types';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import AddIcon from '@mui/icons-material/Add';
 
 type Tea = TeaBase & { recentBrewed?: string | null };
 
-const TeaListView: React.FC<{ onSelectTea: (teaId: string) => void }> = ({ onSelectTea }) => {
+const TeaListView: React.FC<{ onSelectTea: (teaId: string) => void; onAddTea?: () => void }> = ({ onSelectTea, onAddTea }) => {
   const [teas, setTeas] = useState<Tea[]>([]);
   const [search, setSearch] = useState('');
   const [showOnlyStash, setShowOnlyStash] = useState(false);
@@ -52,7 +53,16 @@ const TeaListView: React.FC<{ onSelectTea: (teaId: string) => void }> = ({ onSel
   });
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>All Teas</Typography>
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
+        <Typography variant="h5" gutterBottom>All Teas</Typography>
+        {onAddTea && (
+          <Tooltip title="Add Tea">
+            <IconButton color="primary" onClick={onAddTea} size="large">
+              <AddIcon />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Box>
       <Box display="flex" alignItems="center" gap={1} mb={1}>
         <TextField
           label="Search teas..."
@@ -79,8 +89,21 @@ const TeaListView: React.FC<{ onSelectTea: (teaId: string) => void }> = ({ onSel
               <Card sx={{ width: '100%', mb: 1, display: 'flex', alignItems: 'center', gap: 2, p: 1, boxShadow: 'none' }}>
                 <img src={tea.photo || placeholderImg} alt="Tea" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 8, border: '1px solid #ccc' }} />
                 <CardContent sx={{ flex: 1, p: 0, '&:last-child': { pb: 0 } }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>{tea.name}</Typography>
-                  {tea.vendor && <Typography variant="body2" color="text.secondary">{tea.vendor}</Typography>}
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 180 }}
+                  >
+                    {tea.name}
+                  </Typography>
+                  {tea.vendor && (
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 180 }}
+                    >
+                      {tea.vendor}
+                    </Typography>
+                  )}
                 </CardContent>
                 {tea.inStash !== false ? (
                   <Tooltip title="In stash"><CheckCircleIcon color="success" /></Tooltip>

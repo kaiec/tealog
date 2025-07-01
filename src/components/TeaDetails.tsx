@@ -28,9 +28,23 @@ const TeaDetails: React.FC<{ teaId: string; onBack: () => void; onEdit?: () => v
           )}
         </Box>
       </Stack>
-      <Typography variant="h4" gutterBottom>{tea.name}</Typography>
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 320 }}
+      >
+        {tea.name}
+      </Typography>
       <Typography variant="h6" color="text.secondary" gutterBottom>{tea.type}</Typography>
-      {tea.vendor && <Typography variant="body1" gutterBottom>Vendor: {tea.vendor}</Typography>}
+      {tea.vendor && (
+        <Typography
+          variant="body1"
+          gutterBottom
+          sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 320 }}
+        >
+          Vendor: {tea.vendor}
+        </Typography>
+      )}
       {tea.description && <Typography variant="body1" gutterBottom>{tea.description}</Typography>}
       {tea.note && <Typography variant="body1" gutterBottom>Note: {tea.note}</Typography>}
       {typeof tea.rating === 'number' && (
