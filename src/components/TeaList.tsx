@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { TextField, Button, Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Select, InputLabel, FormControl, Rating } from '@mui/material';
-import { getTeas, addTea, deleteTea } from '../db';
+import { getTeas, addTea } from '../db';
 import type { Tea } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import IconButton from '@mui/material/IconButton';
