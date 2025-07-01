@@ -10,8 +10,12 @@ const TeaDetails: React.FC<{ teaId: string; onBack: () => void; onEdit?: () => v
     getTeas().then(teas => setTea(teas.find(t => t.id === teaId) || null));
   }, [teaId]);
   if (!tea) return <Typography>Loading...</Typography>;
+  const placeholderImg = `${import.meta.env.BASE_URL}tea-placeholder.png`;
   return (
     <Paper sx={{ p: 3, mt: 2 }} elevation={3}>
+      <Box display="flex" justifyContent="center" mb={2}>
+        <img src={tea.photo || placeholderImg} alt="Tea" style={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 12, border: '1px solid #ccc' }} />
+      </Box>
       <Typography variant="h5" gutterBottom>Tea Details</Typography>
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
         <Button onClick={onBack} variant="outlined">Back to List</Button>

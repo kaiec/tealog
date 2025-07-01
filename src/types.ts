@@ -7,6 +7,7 @@ export interface Tea {
   note?: string;
   rating?: number;
   notes?: string; // legacy, for backwards compatibility
+  photo?: string; // optional photo as data URL or file name
 }
 
 export type TeaAmountUnit = 'g' | 'tsp' | 'bag';
