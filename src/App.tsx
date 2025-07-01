@@ -95,10 +95,7 @@ function App() {
   }
   const handleTeaAdded = (newTeaId?: string) => {
     setTeaListKey(k => k + 1)
-    if (newTeaId) {
-      setSelectedTeaId(newTeaId)
-      setView(VIEW_TEA_DETAILS)
-    }
+    setView(VIEW_TEA_LIST)
   }
 
   const showSnackbar = (message: string, action?: React.ReactNode) => {
@@ -236,7 +233,16 @@ function App() {
               <TeaListView onSelectTea={handleViewTeaDetails} />
             )}
             {view === VIEW_TEA_DETAILS && selectedTeaId && (
-              <TeaDetails teaId={selectedTeaId} onBack={handleViewTeaList} onEdit={() => handleEditTea(selectedTeaId)} />
+              <TeaDetails
+                teaId={selectedTeaId}
+                onBack={handleViewTeaList}
+                onEdit={() => handleEditTea(selectedTeaId)}
+                onAddBrewing={() => {
+                  const tea = teas.find(t => t.id === selectedTeaId) || null;
+                  setSelectedTea(tea);
+                  setView(VIEW_TRACKER);
+                }}
+              />
             )}
             {view === VIEW_EDIT_TEA && editTeaId && (
               <TeaList key={editTeaId} selectedTeaId={editTeaId} onTeaAdded={id => {

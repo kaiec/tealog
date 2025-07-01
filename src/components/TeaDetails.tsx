@@ -4,7 +4,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { getTeas } from '../db';
 import type { Tea } from '../types';
 
-const TeaDetails: React.FC<{ teaId: string; onBack: () => void; onEdit?: () => void }> = ({ teaId, onBack, onEdit }) => {
+const TeaDetails: React.FC<{ teaId: string; onBack: () => void; onEdit?: () => void; onAddBrewing?: () => void }> = ({ teaId, onBack, onEdit, onAddBrewing }) => {
   const [tea, setTea] = useState<Tea | null>(null);
   useEffect(() => {
     getTeas().then(teas => setTea(teas.find(t => t.id === teaId) || null));
@@ -19,9 +19,14 @@ const TeaDetails: React.FC<{ teaId: string; onBack: () => void; onEdit?: () => v
       <Typography variant="h5" gutterBottom>Tea Details</Typography>
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
         <Button onClick={onBack} variant="outlined">Back to List</Button>
-        {onEdit && (
-          <Button onClick={onEdit} variant="contained" startIcon={<EditIcon />}>Edit</Button>
-        )}
+        <Box display="flex" gap={1}>
+          {onEdit && (
+            <Button onClick={onEdit} variant="contained" startIcon={<EditIcon />}>Edit</Button>
+          )}
+          {onAddBrewing && (
+            <Button onClick={onAddBrewing} variant="contained">Add Brewing</Button>
+          )}
+        </Box>
       </Stack>
       <Typography variant="h4" gutterBottom>{tea.name}</Typography>
       <Typography variant="h6" color="text.secondary" gutterBottom>{tea.type}</Typography>

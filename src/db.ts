@@ -43,6 +43,9 @@ export async function deleteTea(id: string) {
 export async function getBrewingsByTea(teaId: string) {
   return (await dbPromise).getAllFromIndex('brewings', 'teaId', teaId);
 }
+export async function getAllBrewings() {
+  return (await dbPromise).getAll('brewings');
+}
 export async function addBrewing(brewing: Brewing) {
   return (await dbPromise).put('brewings', brewing);
 }

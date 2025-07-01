@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { TextField, Button, Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Select, InputLabel, FormControl, Rating } from '@mui/material';
+import { TextField, Button, Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Select, InputLabel, FormControl, Rating, Checkbox, FormControlLabel } from '@mui/material';
 import { getTeas, addTea } from '../db';
 import type { Tea } from '../types';
 import { v4 as uuidv4 } from 'uuid';
@@ -34,6 +34,8 @@ const TeaList: React.FC<{ selectedTeaId?: string; onTeaAdded?: (teaId: string) =
   const [editRating, setEditRating] = useState<number | null>(null);
   const [photo, setPhoto] = useState<string | undefined>(undefined);
   const [editPhoto, setEditPhoto] = useState<string | undefined>(undefined);
+  const [inStash, setInStash] = useState(true);
+  const [editInStash, setEditInStash] = useState(true);
 
   useEffect(() => {
     if (selectedTeaId) {
@@ -47,6 +49,7 @@ const TeaList: React.FC<{ selectedTeaId?: string; onTeaAdded?: (teaId: string) =
           setNote(tea.note || '');
           setRating(typeof tea.rating === 'number' ? tea.rating : null);
           setPhoto(tea.photo);
+          setInStash(tea.inStash !== false);
         }
       });
     } else {
@@ -57,6 +60,7 @@ const TeaList: React.FC<{ selectedTeaId?: string; onTeaAdded?: (teaId: string) =
       setNote('');
       setRating(null);
       setPhoto(undefined);
+      setInStash(true);
     }
   }, [selectedTeaId]);
 
@@ -84,11 +88,24 @@ const TeaList: React.FC<{ selectedTeaId?: string; onTeaAdded?: (teaId: string) =
         note: editNote || undefined,
         rating: editRating ?? undefined,
         photo: editPhoto,
+        inStash: editInStash,
       });
       setEditTea(null);
       showSnackbar && showSnackbar('Tea updated');
       if (onTeaAdded) onTeaAdded(editTea.id);
     }
+  };
+
+  const handleEdit = (tea: Tea) => {
+    setEditTea(tea);
+    setEditName(tea.name);
+    setEditType(tea.type || '');
+    setEditVendor(tea.vendor || '');
+    setEditDescription(tea.description || '');
+    setEditNote(tea.note || '');
+    setEditRating(tea.rating ?? null);
+    setEditPhoto(tea.photo);
+    setEditInStash(tea.inStash !== false);
   };
 
   return (
@@ -127,6 +144,10 @@ const TeaList: React.FC<{ selectedTeaId?: string; onTeaAdded?: (teaId: string) =
           <Typography>Rating</Typography>
           <Rating value={rating} onChange={(_, v) => setRating(v)} max={5} />
         </Box>
+        <FormControlLabel
+          control={<Checkbox checked={inStash} onChange={e => setInStash(e.target.checked)} />}
+          label="Currently in stash"
+        />
         <Button variant="contained" onClick={async () => {
           if (!name.trim()) return;
           const newTea = {
@@ -138,9 +159,10 @@ const TeaList: React.FC<{ selectedTeaId?: string; onTeaAdded?: (teaId: string) =
             note: note || undefined,
             rating: rating ?? undefined,
             photo: photo,
+            inStash: inStash,
           };
           await addTea(newTea);
-          setName(''); setType(''); setVendor(''); setDescription(''); setNote(''); setRating(null); setPhoto(undefined);
+          setName(''); setType(''); setVendor(''); setDescription(''); setNote(''); setRating(null); setPhoto(undefined); setInStash(true);
           if (onTeaAdded) onTeaAdded(newTea.id);
           showSnackbar && showSnackbar(selectedTeaId ? 'Tea updated' : 'Tea added');
         }}>{selectedTeaId ? 'Save' : 'Add'}</Button>
@@ -189,6 +211,10 @@ const TeaList: React.FC<{ selectedTeaId?: string; onTeaAdded?: (teaId: string) =
             <Typography>Rating</Typography>
             <Rating value={editRating} onChange={(_, v) => setEditRating(v)} max={5} />
           </Box>
+          <FormControlLabel
+            control={<Checkbox checked={editInStash} onChange={e => setEditInStash(e.target.checked)} />}
+            label="Currently in stash"
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setEditTea(null)}>Cancel</Button>
