@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { AppBar, Toolbar, Typography, Container, Box, Paper, Button, Stack, IconButton, MenuItem, Select, InputLabel, FormControl, Snackbar } from '@mui/material'
-import HomeIcon from '@mui/icons-material/Home'
 import TeaList from './components/TeaList'
 import BrewingList from './components/BrewingList'
 import InfusionList from './components/InfusionList'
@@ -26,6 +25,7 @@ function App() {
   const [recentTeas, setRecentTeas] = useState<string[]>([])
   const [snackbar, setSnackbar] = useState<{ open: boolean, message: string, action?: React.ReactNode }>({ open: false, message: '' })
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
+  const [updateAvailable, setUpdateAvailable] = useState(false)
 
   // Load teas for dropdown
   useEffect(() => {
@@ -38,6 +38,12 @@ function App() {
       setRecentTeas(prev => [selectedTea.id, ...prev.filter(id => id !== selectedTea.id)])
     }
   }, [selectedTea])
+
+  useEffect(() => {
+    const handler = () => setUpdateAvailable(true)
+    window.addEventListener('pwa-update-available', handler)
+    return () => window.removeEventListener('pwa-update-available', handler)
+  }, [])
 
   // Home screen actions
   const handleAddTea = () => {
@@ -196,6 +202,16 @@ function App() {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         message={snackbar.message}
         action={snackbar.action}
+      />
+      <Snackbar
+        open={updateAvailable}
+        message="A new version is available. Reload?"
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        action={
+          <Button color="secondary" size="small" onClick={() => window.location.reload()}>
+            Reload
+          </Button>
+        }
       />
     </Box>
   )

@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material'
+import { registerSW } from './serviceWorkerRegistration'
 
 const theme = createTheme({
   palette: {
@@ -50,6 +51,11 @@ const theme = createTheme({
       },
     },
   },
+})
+
+// Set up a global event for update detection
+registerSW(() => {
+  window.dispatchEvent(new Event('pwa-update-available'))
 })
 
 createRoot(document.getElementById('root')!).render(
