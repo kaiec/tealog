@@ -6,6 +6,7 @@ import InfusionList from './components/InfusionList'
 import BrewingJournal from './components/BrewingJournal'
 import TeaListView from './components/TeaListView'
 import TeaDetails from './components/TeaDetails'
+import TeaSelectionGrid from './components/TeaSelectionGrid'
 import { getTeas } from './db'
 import type { Tea, Brewing } from './types'
 import MenuIcon from '@mui/icons-material/Menu'
@@ -223,30 +224,41 @@ function App() {
             )}
             {view === VIEW_TRACKER && (
               <>
-                <FormControl fullWidth sx={{ mb: 2 }}>
-                  <InputLabel>Select Tea</InputLabel>
-                  <Select
-                    value={selectedTea?.id || ''}
-                    label="Select Tea"
-                    onChange={e => {
-                      const tea = teas.find(t => t.id === e.target.value)
-                      setSelectedTea(tea || null)
+                {!selectedTea ? (
+                  <TeaSelectionGrid
+                    onSelectTea={(tea) => {
+                      setSelectedTea(tea)
                       setSelectedBrewing(null)
                     }}
-                  >
-                    {sortedTeas.map(tea => (
-                      <MenuItem key={tea.id} value={tea.id}>{tea.name} {tea.type ? `(${tea.type})` : ''}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <BrewingList
-                  key={brewingListKey}
-                  tea={selectedTea}
-                  onSelect={setSelectedBrewing}
-                  selectedBrewingId={selectedBrewing?.id}
-                  showSnackbar={showSnackbar}
-                />
-                <InfusionList brewing={selectedBrewing} showSnackbar={showSnackbar} />
+                    selectedTeaId={undefined}
+                  />
+                ) : (
+                  <>
+                    <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Button 
+                        variant="outlined" 
+                        size="small"
+                        onClick={() => {
+                          setSelectedTea(null)
+                          setSelectedBrewing(null)
+                        }}
+                      >
+                        ← Back to Tea Selection
+                      </Button>
+                      <Typography variant="h6">
+                        Brewing: {selectedTea.name}
+                      </Typography>
+                    </Box>
+                    <BrewingList
+                      key={brewingListKey}
+                      tea={selectedTea}
+                      onSelect={setSelectedBrewing}
+                      selectedBrewingId={selectedBrewing?.id}
+                      showSnackbar={showSnackbar}
+                    />
+                    <InfusionList brewing={selectedBrewing} showSnackbar={showSnackbar} />
+                  </>
+                )}
               </>
             )}
             {view === VIEW_TEA_LIST && (
