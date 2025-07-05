@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Box, Typography, Card, CardContent, Button, List, ListItem, ListItemText, ListItemButton, IconButton, Chip, Divider, TextField, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { getTeaById, getInfusionsByBrewing, addInfusion, deleteInfusion, getBrewingsByTea } from '../db';
 import type { Brewing, Tea, Infusion } from '../types';
@@ -35,9 +35,9 @@ const BrewingDetails: React.FC<BrewingDetailsProps> = ({
   const [editTasteNotes, setEditTasteNotes] = useState('');
   const lastDeletedInfusion = React.useRef<Infusion | null>(null);
 
-  const defaultInfusion = { waterAmount: '', temperature: '', steepTime: '', tasteNotes: '' };
+  const defaultInfusion = useMemo(() => ({ waterAmount: '', temperature: '', steepTime: '', tasteNotes: '' }), []);
 
-  const prefillFromPreviousBrewing = async (brewing: Brewing, idx: number) => {
+  const prefillFromPreviousBrewing = useCallback(async (brewing: Brewing, idx: number) => {
     const brewings = await getBrewingsByTea(brewing.teaId);
     // Only consider brewings before the current one (by date)
     const previous = brewings
@@ -57,7 +57,7 @@ const BrewingDetails: React.FC<BrewingDetailsProps> = ({
       };
     }
     return defaultInfusion;
-  };
+  }, [defaultInfusion]);
 
   const refreshInfusions = useCallback(async () => {
     const infs = await getInfusionsByBrewing(brewing.id);
@@ -96,7 +96,7 @@ const BrewingDetails: React.FC<BrewingDetailsProps> = ({
     setTemperature(prefill.temperature);
     setSteepTime(prefill.steepTime);
     setTasteNotes(prefill.tasteNotes);
-  }, [brewing]);
+  }, [brewing, defaultInfusion, prefillFromPreviousBrewing]);
 
   useEffect(() => {
     async function fetchData() {
@@ -121,7 +121,9 @@ const BrewingDetails: React.FC<BrewingDetailsProps> = ({
     };
     await addInfusion(newInfusion);
     refreshInfusions();
-    showSnackbar && showSnackbar('Infusion added');
+    if (showSnackbar) {
+      showSnackbar('Infusion added');
+    }
   };
 
   const handleDeleteInfusion = async (id: string) => {
@@ -130,15 +132,19 @@ const BrewingDetails: React.FC<BrewingDetailsProps> = ({
     lastDeletedInfusion.current = infusionToDelete;
     await deleteInfusion(id);
     refreshInfusions();
-    showSnackbar && showSnackbar('Infusion deleted', (
-      <Button color="secondary" size="small" onClick={async () => {
-        if (lastDeletedInfusion.current) {
-          await addInfusion(lastDeletedInfusion.current);
-          refreshInfusions();
-          showSnackbar && showSnackbar('Infusion restored');
-        }
-      }}>Undo</Button>
-    ));
+    if (showSnackbar) {
+      showSnackbar('Infusion deleted', (
+        <Button color="secondary" size="small" onClick={async () => {
+          if (lastDeletedInfusion.current) {
+            await addInfusion(lastDeletedInfusion.current);
+            refreshInfusions();
+            if (showSnackbar) {
+              showSnackbar('Infusion restored');
+            }
+          }
+        }}>Undo</Button>
+      ));
+    }
   };
 
   const handleEditInfusion = (infusion: Infusion) => {
@@ -168,7 +174,9 @@ const BrewingDetails: React.FC<BrewingDetailsProps> = ({
       });
       setEditInfusion(null);
       refreshInfusions();
-      showSnackbar && showSnackbar('Infusion updated');
+      if (showSnackbar) {
+        showSnackbar('Infusion updated');
+      }
     }
   };
 

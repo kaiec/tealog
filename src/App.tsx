@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { AppBar, Toolbar, Typography, Container, Box, Paper, Button, Stack, IconButton, MenuItem, Select, InputLabel, FormControl, Snackbar } from '@mui/material'
+import { AppBar, Toolbar, Typography, Container, Box, Paper, Button, Stack, IconButton, MenuItem, Snackbar } from '@mui/material'
 import TeaList from './components/TeaList'
 import BrewingList from './components/BrewingList'
 import BrewingJournal from './components/BrewingJournal'
@@ -38,7 +38,6 @@ function App() {
   const [teas, setTeas] = useState<Tea[]>([])
   const [teaListKey, setTeaListKey] = useState(0) // for forcing TeaList refresh
   const [brewingListKey, setBrewingListKey] = useState(0) // for forcing BrewingList refresh
-  const [recentTeas, setRecentTeas] = useState<string[]>([])
   const [snackbar, setSnackbar] = useState<{ open: boolean, message: string, action?: React.ReactNode }>({ open: false, message: '' })
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
   const [updateAvailable, setUpdateAvailable] = useState(false)
@@ -50,13 +49,6 @@ function App() {
   useEffect(() => {
     getTeas().then(setTeas)
   }, [teaListKey])
-
-  // Track recently used teas
-  useEffect(() => {
-    if (selectedTea) {
-      setRecentTeas(prev => [selectedTea.id, ...prev.filter(id => id !== selectedTea.id)])
-    }
-  }, [selectedTea])
 
   useEffect(() => {
     const handler = () => setUpdateAvailable(true)
@@ -148,21 +140,23 @@ function App() {
         }
         if (event.state.view === VIEW_BREWING_DETAILS && event.state.brewingId) {
           import('./db').then(db => {
-            db.getBrewingsByTea && db.getTeas && db.getTeas().then(teasList => {
-              const findBrewing = async () => {
-                for (const tea of teasList) {
-                  const brewings = await db.getBrewingsByTea(tea.id)
-                  const found = brewings.find(b => b.id === event.state.brewingId)
-                  if (found) {
-                    setSelectedBrewingForDetails(found)
-                    setViewState(VIEW_BREWING_DETAILS)
-                    return
+            if (db.getBrewingsByTea && db.getTeas) {
+              db.getTeas().then(teasList => {
+                const findBrewing = async () => {
+                  for (const tea of teasList) {
+                    const brewings = await db.getBrewingsByTea(tea.id)
+                    const found = brewings.find(b => b.id === event.state.brewingId)
+                    if (found) {
+                      setSelectedBrewingForDetails(found)
+                      setViewState(VIEW_BREWING_DETAILS)
+                      return
+                    }
                   }
+                  setSelectedBrewingForDetails(null)
                 }
-                setSelectedBrewingForDetails(null)
-              }
-              findBrewing()
-            })
+                findBrewing()
+              })
+            }
           })
         }
       } else {
@@ -222,16 +216,6 @@ function App() {
     }
     closeMenu()
   }
-
-  // Sorted teas: most recently used on top
-  const sortedTeas = [...teas].sort((a, b) => {
-    const aIdx = recentTeas.indexOf(a.id)
-    const bIdx = recentTeas.indexOf(b.id)
-    if (aIdx === -1 && bIdx === -1) return a.name.localeCompare(b.name)
-    if (aIdx === -1) return 1
-    if (bIdx === -1) return -1
-    return aIdx - bIdx
-  })
 
   // Add a handler for viewing tea list
   const handleViewTeaList = () => {

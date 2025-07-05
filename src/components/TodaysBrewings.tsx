@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Card, CardContent, List, ListItem, ListItemButton, ListItemText, Chip, Button } from '@mui/material';
+import { Box, Typography, Card, CardContent, List, ListItem, ListItemButton, Chip, Button } from '@mui/material';
 import { getTeas, getAllBrewings } from '../db';
 import type { Tea, Brewing } from '../types';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';

@@ -13,7 +13,6 @@ interface TeaSelectionGridProps {
 
 const TeaSelectionGrid: React.FC<TeaSelectionGridProps> = ({ onSelectTea, selectedTeaId }) => {
   const [teas, setTeas] = useState<Tea[]>([]);
-  const [recentTeas, setRecentTeas] = useState<string[]>([]);
 
   useEffect(() => {
     async function fetchTeasWithBrewed() {
@@ -47,13 +46,6 @@ const TeaSelectionGrid: React.FC<TeaSelectionGridProps> = ({ onSelectTea, select
       });
 
       setTeas(sortedTeas);
-
-      // Extract recent tea IDs for highlighting
-      const recentIds = sortedTeas
-        .filter(tea => tea.recentBrewed)
-        .slice(0, 5)
-        .map(tea => tea.id);
-      setRecentTeas(recentIds);
     }
 
     fetchTeasWithBrewed();
