@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const unitOptions: TeaAmountUnit[] = ['g', 'tsp', 'bag'];
 
-const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => void; selectedBrewingId?: string; showSnackbar?: (msg: string, action?: React.ReactNode) => void }> = ({ tea, onSelect, selectedBrewingId, showSnackbar }) => {
+const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => void; selectedBrewingId?: string; showSnackbar?: (msg: string, action?: React.ReactNode) => void; onBrewingClick?: (brewing: Brewing) => void }> = ({ tea, onSelect, selectedBrewingId, showSnackbar, onBrewingClick }) => {
   const [brewings, setBrewings] = useState<Brewing[]>([]);
   const [amount, setAmount] = useState('');
   const [unit, setUnit] = useState<TeaAmountUnit>('g');
@@ -125,7 +125,12 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
           >
             <ListItemButton
               selected={brewing.id === selectedBrewingId}
-              onClick={() => onSelect(brewing)}
+              onClick={() => {
+                onSelect(brewing)
+                if (onBrewingClick) {
+                  onBrewingClick(brewing)
+                }
+              }}
             >
               <ListItemText primary={`Brewed on ${new Date(brewing.date).toLocaleString()}`} secondary={`Amount: ${brewing.amount} ${brewing.unit}`} />
             </ListItemButton>

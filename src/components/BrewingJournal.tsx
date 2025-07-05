@@ -45,8 +45,32 @@ const BrewingJournal: React.FC<BrewingJournalProps> = ({ onSelectBrewing }) => {
             const totalWater = infusions.reduce((sum, i) => sum + i.waterAmount, 0);
             const content = (
               <ListItemText
-                primary={`${tea.name} (${tea.type || 'Unknown'}) — ${brewing.amount} ${brewing.unit}`}
-                secondary={`Brewed: ${new Date(brewing.date).toLocaleString()} | Total water: ${totalWater} ml`}
+                primary={
+                  <Typography
+                    sx={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      maxWidth: '100%'
+                    }}
+                    title={`${tea.name} (${tea.type || 'Unknown'}) — ${brewing.amount} ${brewing.unit}`}
+                  >
+                    {`${tea.name} (${tea.type || 'Unknown'}) — ${brewing.amount} ${brewing.unit}`}
+                  </Typography>
+                }
+                secondary={
+                  <Typography
+                    sx={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      maxWidth: '100%'
+                    }}
+                    title={`Brewed: ${new Date(brewing.date).toLocaleString()} | Total water: ${totalWater} ml`}
+                  >
+                    {`Brewed: ${new Date(brewing.date).toLocaleString()} | Total water: ${totalWater} ml`}
+                  </Typography>
+                }
               />
             );
             return onSelectBrewing ? (

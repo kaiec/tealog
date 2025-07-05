@@ -32,6 +32,9 @@ export const dbPromise = openDB<TeaTrackerDB>('tea-tracker-db', 1, {
 export async function getTeas() {
   return (await dbPromise).getAll('teas');
 }
+export async function getTeaById(id: string) {
+  return (await dbPromise).get('teas', id);
+}
 export async function addTea(tea: Tea) {
   return (await dbPromise).put('teas', tea);
 }

@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react'
 import { AppBar, Toolbar, Typography, Container, Box, Paper, Button, Stack, IconButton, MenuItem, Select, InputLabel, FormControl, Snackbar } from '@mui/material'
 import TeaList from './components/TeaList'
 import BrewingList from './components/BrewingList'
-import InfusionList from './components/InfusionList'
 import BrewingJournal from './components/BrewingJournal'
 import TeaListView from './components/TeaListView'
 import TeaDetails from './components/TeaDetails'
 import TeaSelectionGrid from './components/TeaSelectionGrid'
+import BrewingDetails from './components/BrewingDetails'
 import { getTeas } from './db'
 import type { Tea, Brewing } from './types'
 import MenuIcon from '@mui/icons-material/Menu'
@@ -27,6 +27,7 @@ const VIEW_ADD_TEA = 'add-tea'
 const VIEW_TEA_LIST = 'tea-list'
 const VIEW_TEA_DETAILS = 'tea-details'
 const VIEW_EDIT_TEA = 'edit-tea'
+const VIEW_BREWING_DETAILS = 'brewing-details'
 
 function App() {
   const [selectedTea, setSelectedTea] = useState<Tea | null>(null)
@@ -41,6 +42,7 @@ function App() {
   const [updateAvailable, setUpdateAvailable] = useState(false)
   const [selectedTeaId, setSelectedTeaId] = useState<string | null>(null)
   const [editTeaId, setEditTeaId] = useState<string | null>(null)
+  const [selectedBrewingForDetails, setSelectedBrewingForDetails] = useState<Brewing | null>(null)
 
   // Load teas for dropdown
   useEffect(() => {
@@ -260,12 +262,32 @@ function App() {
                             border: '1px solid #ccc'
                           }} 
                         />
-                        <Box>
-                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography 
+                            variant="h6" 
+                            sx={{ 
+                              fontWeight: 600,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              maxWidth: '100%'
+                            }}
+                            title={selectedTea.name}
+                          >
                             {selectedTea.name}
                           </Typography>
                           {selectedTea.vendor && (
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography 
+                              variant="body2" 
+                              color="text.secondary"
+                              sx={{
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                maxWidth: '100%'
+                              }}
+                              title={selectedTea.vendor}
+                            >
                               {selectedTea.vendor}
                             </Typography>
                           )}
@@ -278,8 +300,11 @@ function App() {
                       onSelect={setSelectedBrewing}
                       selectedBrewingId={selectedBrewing?.id}
                       showSnackbar={showSnackbar}
+                      onBrewingClick={(brewing) => {
+                        setSelectedBrewingForDetails(brewing)
+                        setView(VIEW_BREWING_DETAILS)
+                      }}
                     />
-                    <InfusionList brewing={selectedBrewing} showSnackbar={showSnackbar} />
                   </>
                 )}
               </>
@@ -308,8 +333,18 @@ function App() {
                 }
               }} showSnackbar={showSnackbar} />
             )}
+            {view === VIEW_BREWING_DETAILS && selectedBrewingForDetails && (
+              <BrewingDetails
+                brewing={selectedBrewingForDetails}
+                onBack={() => {
+                  setSelectedBrewingForDetails(null)
+                  setView(VIEW_TRACKER)
+                }}
+                showSnackbar={showSnackbar}
+              />
+            )}
             {/* Empty state placeholder for any view with no content */}
-            {view !== VIEW_HOME && view !== VIEW_LOG && view !== VIEW_ADD_TEA && view !== VIEW_TRACKER && view !== VIEW_TEA_LIST && view !== VIEW_TEA_DETAILS && view !== VIEW_EDIT_TEA && (
+            {view !== VIEW_HOME && view !== VIEW_LOG && view !== VIEW_ADD_TEA && view !== VIEW_TRACKER && view !== VIEW_TEA_LIST && view !== VIEW_TEA_DETAILS && view !== VIEW_EDIT_TEA && view !== VIEW_BREWING_DETAILS && (
               <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'text.secondary' }}>
                 <Typography variant="body1">No content to display.</Typography>
               </Box>
