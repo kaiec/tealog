@@ -7,6 +7,7 @@ import TeaListView from './components/TeaListView'
 import TeaDetails from './components/TeaDetails'
 import TeaSelectionGrid from './components/TeaSelectionGrid'
 import BrewingDetails from './components/BrewingDetails'
+import TodaysBrewings from './components/TodaysBrewings'
 import { getTeas } from './db'
 import type { Tea, Brewing } from './types'
 import MenuIcon from '@mui/icons-material/Menu'
@@ -28,6 +29,7 @@ const VIEW_TEA_LIST = 'tea-list'
 const VIEW_TEA_DETAILS = 'tea-details'
 const VIEW_EDIT_TEA = 'edit-tea'
 const VIEW_BREWING_DETAILS = 'brewing-details'
+const VIEW_TODAYS_BREWINGS = 'todays-brewings'
 
 function App() {
   const [selectedTea, setSelectedTea] = useState<Tea | null>(null)
@@ -193,7 +195,7 @@ function App() {
   const handleAddInfusionToLastBrewing = () => {
     setSelectedTea(null) // Ensure we start with tea selection
     setSelectedBrewing(null)
-    setView(VIEW_TRACKER, false, false) // Explicitly set teaSelected to false
+    setView(VIEW_TODAYS_BREWINGS, false, false) // Explicitly set teaSelected to false
   }
   const handleTeaAdded = () => {
     setTeaListKey(k => k + 1)
@@ -466,8 +468,19 @@ function App() {
                 </Box>
               )
             )}
+            {view === VIEW_TODAYS_BREWINGS && (
+              <TodaysBrewings 
+                onBack={() => setView(VIEW_HOME, true)}
+                onSelectBrewing={(brewing, tea) => {
+                  // Set the tea and brewing, then use the proper function to show details
+                  setSelectedTea(tea)
+                  setSelectedBrewing(brewing)
+                  handleShowBrewingDetails(brewing)
+                }}
+              />
+            )}
             {/* Empty state placeholder for any view with no content */}
-            {view !== VIEW_HOME && view !== VIEW_LOG && view !== VIEW_ADD_TEA && view !== VIEW_TRACKER && view !== VIEW_TEA_LIST && view !== VIEW_TEA_DETAILS && view !== VIEW_EDIT_TEA && view !== VIEW_BREWING_DETAILS && (
+            {view !== VIEW_HOME && view !== VIEW_LOG && view !== VIEW_ADD_TEA && view !== VIEW_TRACKER && view !== VIEW_TEA_LIST && view !== VIEW_TEA_DETAILS && view !== VIEW_EDIT_TEA && view !== VIEW_BREWING_DETAILS && view !== VIEW_TODAYS_BREWINGS && (
               <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'text.secondary' }}>
                 <Typography variant="body1">No content to display.</Typography>
               </Box>
