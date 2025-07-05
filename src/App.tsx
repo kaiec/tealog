@@ -21,8 +21,8 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 
 // Navigation states
 const VIEW_HOME = 'home'
-const VIEW_LOG = 'log'
-const VIEW_TRACKER = 'tracker'
+const VIEW_LOG = 'brewing-journal'
+const VIEW_TRACKER = 'brewing-tracker'
 const VIEW_ADD_TEA = 'add-tea'
 const VIEW_TEA_LIST = 'tea-list'
 const VIEW_TEA_DETAILS = 'tea-details'
@@ -62,11 +62,54 @@ function App() {
     return () => window.removeEventListener('pwa-update-available', handler)
   }, [])
 
+  // Helper functions for tea selection state management
+  const selectTea = (tea: Tea) => {
+    setSelectedTea(tea)
+    setSelectedBrewing(null)
+    // Don't push new history state - just update the current state
+    const currentState = window.history.state || { view: VIEW_TRACKER, teaSelected: false }
+    const newState = { ...currentState, teaSelected: true }
+    window.history.replaceState(newState, '')
+  }
+
+  const deselectTea = () => {
+    setSelectedTea(null)
+    setSelectedBrewing(null)
+    // Don't push new history state - just update the current state
+    const currentState = window.history.state || { view: VIEW_TRACKER, teaSelected: true }
+    const newState = { ...currentState, teaSelected: false }
+    window.history.replaceState(newState, '')
+  }
+
   // Set view and push to history
-  const setView = (newView: string) => {
+  const setView = (newView: string, clearState: boolean = false, forceTeaSelected?: boolean) => {
     setViewState(newView)
-    if (newView !== VIEW_EDIT_TEA) setEditTeaId(null)
-    window.history.pushState({ view: newView }, '')
+    if (clearState || newView !== VIEW_EDIT_TEA) {
+      setEditTeaId(null)
+      setSelectedTeaId(null)
+      setSelectedBrewingForDetails(null)
+    }
+    if (newView === VIEW_HOME) {
+      // Clear all state when going home
+      setSelectedTea(null)
+      setSelectedBrewing(null)
+    }
+    // Set tea selection state for VIEW_TRACKER
+    const state: { view: string; teaSelected?: boolean; teaId?: string; editTeaId?: string; brewingId?: string } = { view: newView }
+    if (newView === VIEW_TRACKER) {
+      // Use explicit teaSelected state if provided, otherwise use current selectedTea state
+      state.teaSelected = forceTeaSelected !== undefined ? forceTeaSelected : selectedTea !== null
+    }
+    if (newView === VIEW_TEA_DETAILS && selectedTeaId) {
+      state.teaId = selectedTeaId
+    }
+    if (newView === VIEW_EDIT_TEA && editTeaId) {
+      state.editTeaId = editTeaId
+    }
+    if (newView === VIEW_BREWING_DETAILS && selectedBrewingForDetails) {
+      state.brewingId = selectedBrewingForDetails.id
+    }
+    window.history.pushState(state, '')
   }
 
   // On mount, set initial state and listen for popstate
@@ -76,11 +119,63 @@ function App() {
     const onPopState = (event: PopStateEvent) => {
       if (event.state && event.state.view) {
         setViewState(event.state.view)
+        // Clear state when navigating back to home
+        if (event.state.view === VIEW_HOME) {
+          setSelectedTea(null)
+          setSelectedBrewing(null)
+          setSelectedTeaId(null)
+          setSelectedBrewingForDetails(null)
+          setEditTeaId(null)
+        }
+        // Handle tea selection state in VIEW_TRACKER
+        if (event.state.view === VIEW_TRACKER) {
+          if (event.state.teaSelected === false) {
+            setSelectedTea(null)
+            setSelectedBrewing(null)
+          } else if (event.state.teaSelected === true && !selectedTea) {
+            setSelectedTea(null)
+            setSelectedBrewing(null)
+          }
+        }
+        // Handle other view-specific state
+        if (event.state.view === VIEW_TEA_DETAILS && event.state.teaId) {
+          setSelectedTeaId(event.state.teaId)
+        }
+        if (event.state.view === VIEW_EDIT_TEA && event.state.editTeaId) {
+          setEditTeaId(event.state.editTeaId)
+        }
+        if (event.state.view === VIEW_BREWING_DETAILS && event.state.brewingId) {
+          import('./db').then(db => {
+            db.getBrewingsByTea && db.getTeas && db.getTeas().then(teasList => {
+              const findBrewing = async () => {
+                for (const tea of teasList) {
+                  const brewings = await db.getBrewingsByTea(tea.id)
+                  const found = brewings.find(b => b.id === event.state.brewingId)
+                  if (found) {
+                    setSelectedBrewingForDetails(found)
+                    setViewState(VIEW_BREWING_DETAILS)
+                    return
+                  }
+                }
+                setSelectedBrewingForDetails(null)
+              }
+              findBrewing()
+            })
+          })
+        }
+      } else {
+        // If no state, go to home
+        setViewState(VIEW_HOME)
+        setSelectedTea(null)
+        setSelectedBrewing(null)
+        setSelectedTeaId(null)
+        setSelectedBrewingForDetails(null)
+        setEditTeaId(null)
       }
     }
     window.addEventListener('popstate', onPopState)
     return () => window.removeEventListener('popstate', onPopState)
-  }, [])
+  }, [selectedTea, teas]) // Add teas as dependency
 
   // Home screen actions
   const handleAddTea = () => {
@@ -90,18 +185,15 @@ function App() {
     setTeaListKey(k => k + 1) // force TeaList to show add form
   }
   const handleAddBrewing = () => {
-    setView(VIEW_TRACKER)
+    setSelectedTea(null) // Ensure we start with tea selection
     setSelectedBrewing(null)
     setBrewingListKey(k => k + 1) // force BrewingList to show add form
+    setView(VIEW_TRACKER, false, false) // Explicitly set teaSelected to false
   }
   const handleAddInfusionToLastBrewing = () => {
-    setView(VIEW_TRACKER)
-    // Select the last tea and last brewing
-    setSelectedTea(null)
+    setSelectedTea(null) // Ensure we start with tea selection
     setSelectedBrewing(null)
-    setTimeout(() => {
-      setSelectedTea(prev => prev) // trigger rerender
-    }, 0)
+    setView(VIEW_TRACKER, false, false) // Explicitly set teaSelected to false
   }
   const handleTeaAdded = () => {
     setTeaListKey(k => k + 1)
@@ -119,7 +211,13 @@ function App() {
   const openMenu = (event: React.MouseEvent<HTMLElement>) => setMenuAnchorEl(event.currentTarget)
   const closeMenu = () => setMenuAnchorEl(null)
   const handleMenuSelect = (viewName: string) => {
-    setView(viewName)
+    if (viewName === VIEW_TRACKER) {
+      setSelectedTea(null) // Ensure we start with tea selection
+      setSelectedBrewing(null)
+      setView(VIEW_TRACKER, false, false) // Explicitly set teaSelected to false
+    } else {
+      setView(viewName)
+    }
     closeMenu()
   }
 
@@ -148,6 +246,13 @@ function App() {
   const handleEditTea = (teaId: string) => {
     setEditTeaId(teaId)
     setView(VIEW_EDIT_TEA)
+  }
+
+  // Helper to show brewing details and update history
+  const handleShowBrewingDetails = (brewing: Brewing) => {
+    setSelectedBrewingForDetails(brewing)
+    setViewState(VIEW_BREWING_DETAILS)
+    window.history.pushState({ view: VIEW_BREWING_DETAILS, brewingId: brewing.id }, '')
   }
 
   return (
@@ -219,20 +324,28 @@ function App() {
               <BrewingJournal onSelectBrewing={(brewing, tea) => {
                 setSelectedTea(tea)
                 setSelectedBrewing(brewing)
-                setView(VIEW_TRACKER)
+                setView(VIEW_TRACKER, false, true) // Explicitly set teaSelected to true
               }} />
             )}
             {view === VIEW_ADD_TEA && (
-              <TeaList key={teaListKey} selectedTeaId={undefined} onTeaAdded={handleTeaAdded} showSnackbar={showSnackbar} />
+              <TeaList 
+                key={teaListKey} 
+                selectedTeaId={undefined} 
+                onTeaAdded={(teaId) => {
+                  if (teaId) {
+                    handleTeaAdded()
+                  } else {
+                    setView(VIEW_HOME, true)
+                  }
+                }} 
+                showSnackbar={showSnackbar} 
+              />
             )}
             {view === VIEW_TRACKER && (
               <>
                 {!selectedTea ? (
                   <TeaSelectionGrid
-                    onSelectTea={(tea) => {
-                      setSelectedTea(tea)
-                      setSelectedBrewing(null)
-                    }}
+                    onSelectTea={selectTea}
                     selectedTeaId={undefined}
                   />
                 ) : (
@@ -242,10 +355,7 @@ function App() {
                         variant="text" 
                         size="small"
                         startIcon={<ArrowBackIcon />}
-                        onClick={() => {
-                          setSelectedTea(null)
-                          setSelectedBrewing(null)
-                        }}
+                        onClick={deselectTea}
                         sx={{ mb: 2, color: 'text.secondary' }}
                       >
                         Back to Tea Selection
@@ -300,48 +410,61 @@ function App() {
                       onSelect={setSelectedBrewing}
                       selectedBrewingId={selectedBrewing?.id}
                       showSnackbar={showSnackbar}
-                      onBrewingClick={(brewing) => {
-                        setSelectedBrewingForDetails(brewing)
-                        setView(VIEW_BREWING_DETAILS)
-                      }}
+                      onBrewingClick={handleShowBrewingDetails}
                     />
                   </>
                 )}
               </>
             )}
             {view === VIEW_TEA_LIST && (
-              <TeaListView onSelectTea={handleViewTeaDetails} onAddTea={handleAddTea} />
+              <TeaListView 
+                onSelectTea={handleViewTeaDetails} 
+                onAddTea={handleAddTea} 
+              />
             )}
             {view === VIEW_TEA_DETAILS && selectedTeaId && (
               <TeaDetails
                 teaId={selectedTeaId}
-                onBack={handleViewTeaList}
+                onBack={() => setView(VIEW_TEA_LIST, true)}
                 onEdit={() => handleEditTea(selectedTeaId)}
                 onAddBrewing={() => {
                   const tea = teas.find(t => t.id === selectedTeaId) || null;
                   setSelectedTea(tea);
-                  setView(VIEW_TRACKER);
+                  setView(VIEW_TRACKER, false, true); // Explicitly set teaSelected to true
                 }}
               />
             )}
             {view === VIEW_EDIT_TEA && editTeaId && (
-              <TeaList key={editTeaId} selectedTeaId={editTeaId} onTeaAdded={id => {
-                setEditTeaId(null)
-                if (id) {
-                  setSelectedTeaId(id)
-                  setView(VIEW_TEA_DETAILS)
-                }
-              }} showSnackbar={showSnackbar} />
-            )}
-            {view === VIEW_BREWING_DETAILS && selectedBrewingForDetails && (
-              <BrewingDetails
-                brewing={selectedBrewingForDetails}
-                onBack={() => {
-                  setSelectedBrewingForDetails(null)
-                  setView(VIEW_TRACKER)
-                }}
-                showSnackbar={showSnackbar}
+              <TeaList 
+                key={editTeaId} 
+                selectedTeaId={editTeaId} 
+                onTeaAdded={id => {
+                  if (id) {
+                    setSelectedTeaId(id)
+                    setView(VIEW_TEA_DETAILS)
+                  } else {
+                    setView(VIEW_TEA_DETAILS, true)
+                  }
+                }} 
+                showSnackbar={showSnackbar} 
               />
+            )}
+            {view === VIEW_BREWING_DETAILS && (
+              selectedBrewingForDetails ? (
+                <BrewingDetails
+                  brewing={selectedBrewingForDetails}
+                  onBack={() => {
+                    setSelectedBrewingForDetails(null)
+                    setView(VIEW_TRACKER, true)
+                  }}
+                  showSnackbar={showSnackbar}
+                />
+              ) : (
+                <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'text.secondary' }}>
+                  <Typography variant="body1">No brewing selected. Please go back and select a brewing.</Typography>
+                  <Button onClick={() => setView(VIEW_TRACKER, true)}>Back to Brewings</Button>
+                </Box>
+              )
             )}
             {/* Empty state placeholder for any view with no content */}
             {view !== VIEW_HOME && view !== VIEW_LOG && view !== VIEW_ADD_TEA && view !== VIEW_TRACKER && view !== VIEW_TEA_LIST && view !== VIEW_TEA_DETAILS && view !== VIEW_EDIT_TEA && view !== VIEW_BREWING_DETAILS && (
