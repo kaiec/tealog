@@ -106,7 +106,7 @@ const BrewingList: React.FC<{ tea: Tea | null; onSelect: (brewing: Brewing) => v
         </FormControl>
         <Button variant="contained" onClick={handleAdd}>Add</Button>
       </Box>
-      <Typography variant="h6" gutterBottom>Brewings for {tea.name}</Typography>
+      <Typography variant="h6" gutterBottom>Brewings</Typography>
       <List>
         {brewings.map((brewing: Brewing) => (
           <ListItem

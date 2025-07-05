@@ -17,6 +17,7 @@ import SpeedDialAction from '@mui/material/SpeedDialAction'
 import LocalCafeIcon from '@mui/icons-material/LocalCafe'
 import SpaIcon from '@mui/icons-material/Spa'
 import WaterDropIcon from '@mui/icons-material/WaterDrop'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 
 // Navigation states
 const VIEW_HOME = 'home'
@@ -234,20 +235,42 @@ function App() {
                   />
                 ) : (
                   <>
-                    <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Box sx={{ mb: 3 }}>
                       <Button 
-                        variant="outlined" 
+                        variant="text" 
                         size="small"
+                        startIcon={<ArrowBackIcon />}
                         onClick={() => {
                           setSelectedTea(null)
                           setSelectedBrewing(null)
                         }}
+                        sx={{ mb: 2, color: 'text.secondary' }}
                       >
-                        ← Back to Tea Selection
+                        Back to Tea Selection
                       </Button>
-                      <Typography variant="h6">
-                        Brewing: {selectedTea.name}
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, bgcolor: 'background.paper', borderRadius: 2, border: 1, borderColor: 'divider' }}>
+                        <img 
+                          src={selectedTea.photo || `${import.meta.env.BASE_URL}tea-placeholder.png`} 
+                          alt={selectedTea.name}
+                          style={{ 
+                            width: 64, 
+                            height: 64, 
+                            objectFit: 'cover', 
+                            borderRadius: 12,
+                            border: '1px solid #ccc'
+                          }} 
+                        />
+                        <Box>
+                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                            {selectedTea.name}
+                          </Typography>
+                          {selectedTea.vendor && (
+                            <Typography variant="body2" color="text.secondary">
+                              {selectedTea.vendor}
+                            </Typography>
+                          )}
+                        </Box>
+                      </Box>
                     </Box>
                     <BrewingList
                       key={brewingListKey}
