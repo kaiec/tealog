@@ -1,7 +1,8 @@
 export function registerSW(onUpdate: () => void) {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/service-worker.js').then(registration => {
+      const baseUrl = import.meta.env.BASE_URL || '/';
+      navigator.serviceWorker.register(`${baseUrl}service-worker.js`).then(registration => {
         // Check for updates on load if online
         if (navigator.onLine) {
           registration.update();

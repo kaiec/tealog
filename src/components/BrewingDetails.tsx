@@ -351,21 +351,17 @@ const BrewingDetails: React.FC<BrewingDetailsProps> = ({
                     <ListItemButton>
                       <ListItemText
                         primary={`Infusion ${index + 1}`}
-                        secondary={
-                          <Box>
-                            <Typography variant="body2">
-                              Water: {infusion.waterAmount}ml, Temp: {infusion.temperature}°C, Time: {infusion.steepTime}s
-                            </Typography>
-                            {infusion.tasteNotes && (
-                              <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic' }}>
-                                Notes: {infusion.tasteNotes}
-                              </Typography>
-                            )}
-                          </Box>
-                        }
+                        secondary={`Water: ${infusion.waterAmount}ml, Temp: ${infusion.temperature}°C, Time: ${infusion.steepTime}s`}
                       />
                     </ListItemButton>
                   </ListItem>
+                  {infusion.tasteNotes && (
+                    <Box sx={{ px: 2, pb: 1 }}>
+                      <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+                        Notes: {infusion.tasteNotes}
+                      </Typography>
+                    </Box>
+                  )}
                   {index < infusions.length - 1 && <Divider />}
                 </React.Fragment>
               ))}
