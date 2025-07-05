@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, Typography, Box, Paper, List, ListItemButton, TextField, IconButton, Tooltip, Button } from '@mui/material';
+import { Card, CardContent, Typography, Box, Paper, List, ListItemButton, TextField, IconButton, Tooltip } from '@mui/material';
 import { getTeas, getAllBrewings } from '../db';
 import type { Tea as TeaBase } from '../types';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import AddIcon from '@mui/icons-material/Add';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 type Tea = TeaBase & { recentBrewed?: string | null };
 
-const TeaListView: React.FC<{ onSelectTea: (teaId: string) => void; onAddTea?: () => void; onBack?: () => void }> = ({ onSelectTea, onAddTea, onBack }) => {
+const TeaListView: React.FC<{ onSelectTea: (teaId: string) => void; onAddTea?: () => void }> = ({ onSelectTea, onAddTea }) => {
   const [teas, setTeas] = useState<Tea[]>([]);
   const [search, setSearch] = useState('');
   const [showOnlyStash, setShowOnlyStash] = useState(false);
@@ -54,19 +53,6 @@ const TeaListView: React.FC<{ onSelectTea: (teaId: string) => void; onAddTea?: (
   });
   return (
     <Box>
-      <Box sx={{ mb: 3 }}>
-        {onBack && (
-          <Button 
-            variant="text" 
-            size="small"
-            startIcon={<ArrowBackIcon />}
-            onClick={onBack}
-            sx={{ mb: 2, color: 'text.secondary' }}
-          >
-            Back to Home
-          </Button>
-        )}
-      </Box>
       <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
         <Typography variant="h5" gutterBottom>All Teas</Typography>
         {onAddTea && (
